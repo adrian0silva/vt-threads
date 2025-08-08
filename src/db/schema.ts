@@ -8,7 +8,7 @@ export const roleEnum = pgEnum("role", [
   ]);
 
 export const userTable = pgTable("user", {
-    id: uuid().primaryKey().defaultRandom(),
+    id: text("id").primaryKey(),
     name: text().notNull(),
     role: roleEnum("role").notNull()
 })

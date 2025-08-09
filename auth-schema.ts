@@ -5,7 +5,11 @@ import { roleEnum } from "@/db/schema";
 export const userTable = pgTable("user", {
     id: text("id").primaryKey(),
     name: text().notNull(),
-    role: roleEnum("role").notNull()
+	email: text("email").notNull().unique(),
+	emailVerified: boolean('email_verified').$defaultFn(() => false).notNull(),
+    role: roleEnum("role").notNull().default("USER"),
+	createdAt: timestamp('created_at').$defaultFn(() => /* @__PURE__ */ new Date()).notNull(),
+	updatedAt: timestamp('updated_at').$defaultFn(() => /* @__PURE__ */ new Date()).notNull()
 })
 export const sessionTable = pgTable("session", {
 					id: text('id').primaryKey(),

@@ -3,8 +3,10 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Eye, EyeOff, Lock, Mail, User } from 'lucide-react'
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
+import { toast } from "sonner"
 import { z } from "zod"
 
 import { Button } from "@/components/ui/button"
@@ -13,51 +15,63 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
+import { authClient } from "@/lib/auth-client"
+
+const formSchema = z
+  .object({
+    username: z.string("Nome de usuario inválido.").trim().min(1, "Nome de usuario é obrigatório."),
+    email: z.email("E-mail inválido."),
+    password: z.string("Senha inválida.").min(8, "Senha inválida."),
+    passwordConfirmation: z.string("Senha inválida.").min(8, "Senha inválida."),
+  })
+  .refine(
+    (data) => {
+      return data.password === data.passwordConfirmation;
+    },
+    {
+      error: "As senhas não coincidem.",
+      path: ["passwordConfirmation"],
+    },
+  );
+
+type FormValues = z.infer<typeof formSchema>;
 
 export default function RegisterPage() {
+  const router = useRouter();
+
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const formSchema = z.object({
-    username: z
-      .string()
-      .min(3, "O nome de usuario deve ter pelo menos 3 caracteres"),
-    email: z
-      .string()
-      .email("Informe um e-mail válido"),
-    password: z
-      .string()
-      .min(8, "A senha deve ter pelo menos 8 caracteres"),
-    confirmPassword: z
-      .string()
-      .min(8, "Confirme sua senha"),
-    acceptTerms: z
-      .boolean()
-      .refine((v) => v === true, {
-        message: "Você deve aceitar os termos de serviço",
-      }),
-  }).refine((data) => data.password === data.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "As senhas não coincidem",
-  })
-
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
       email: "",
       password: "",
-      confirmPassword: "",
-      acceptTerms: false,
+      passwordConfirmation: "",
     },
-    mode: "onTouched",
-  })
+  });
 
   const { isSubmitting } = form.formState
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    // Simular chamada de API
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-    console.log("Dados do registro:", values)
+  async function onSubmit(values: FormValues) {
+    const { data,error } = await authClient.signUp.email({
+        name: values.username,
+        email: values.email,
+        password: values.password,
+        fetchOptions: {
+          onSuccess: () => {
+            router.push("/")
+          },
+          onError: (error) => {
+            if(error.error.message === "USER_ALREADY_EXISTS") { 
+              toast.error('E-mail já cadastrado')
+              form.setError("email", { message: "E-mail já cadastrado" })
+            }
+            toast.error(error.error.message)
+          }
+        }
+      });
+      
   }
 
   return (
@@ -162,7 +176,7 @@ export default function RegisterPage() {
                       {/* Campo Confirmar Senha */}
                       <FormField
                         control={form.control}
-                        name="confirmPassword"
+                        name="passwordConfirmation"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Confirmar senha</FormLabel>
@@ -196,7 +210,7 @@ export default function RegisterPage() {
                       />
 
                       {/* Aceitar Termos */}
-                      <FormField
+                      {/* <FormField
                         control={form.control}
                         name="acceptTerms"
                         render={({ field }) => (
@@ -222,7 +236,7 @@ export default function RegisterPage() {
                             <FormMessage />
                           </FormItem>
                         )}
-                      />
+                      /> */}
 
                       {/* Botão de Cadastro */}
                       <Button

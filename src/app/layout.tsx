@@ -30,11 +30,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
       <SidebarProvider>
-          <AppSidebar />
-          <main>
-            <SidebarTrigger />
+          
             {children}
-          </main>
+          
         </SidebarProvider>
       </body>
     </html>

@@ -23,34 +23,90 @@ export const userTable = pgTable("user", {
     .notNull(),
 })
 
-export const categoryTable = pgTable("category", {
-    id: uuid().primaryKey().defaultRandom(),
-    title: text().notNull(),
-    slug: text().notNull().unique(),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
-})
+// ENUM de categorias
+export const forumCategoryEnum = pgEnum("forum_category", [
+    "GAMING",
+    "POLITICA",
+    "VALE_TUDO",
+  ]);
 
-export const categoryRelations = relations(categoryTable, ({many}) => ({
-    forums: many(forumTable),
+// Tabela de fóruns hierárquicos
+export const forumTable = pgTable("forum", (t) => ({
+    id: t.uuid("id").primaryKey().defaultRandom(),
+    // declaramos parentId como coluna, mas sem .references() aqui
+    parentId: t.uuid("parent_id").$type<string | null>().default(null),
+    category: forumCategoryEnum("category").notNull(),
+    title: t.text("title").notNull(),
+    slug: t.text("slug").notNull().unique(),
+    description: t.text("description").notNull(),
+    createdAt: t.timestamp("created_at").notNull().defaultNow(),
+  }));
+
+// Relações
+export const forumRelations = relations(forumTable, ({ one, many }) => ({
+    parent: one(forumTable, {
+        fields: [forumTable.parentId],
+        references: [forumTable.id],
+        relationName: "parent_forum"
+    }),
+    children: many(forumTable, {
+        relationName: "parent_forum"
+    })
 }));
 
-export const forumTable = pgTable("forum", {
-    id: uuid().primaryKey().defaultRandom(),
-    categoryId: uuid('category_id').notNull().references(() => categoryTable.id),
-    title: text().notNull(),
-    slug: text().notNull().unique(),
-    description: text().notNull(),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
-})
-
-export const forumRelations = relations(forumTable, ({one}) => {
-    return {
-        category: one(categoryTable, {
-            fields: [forumTable.categoryId],
-            references: [categoryTable.id]
-        })
-    }
-})
+// Tabela de threads
+export const threadTable = pgTable("thread", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    title: text("title").notNull(),
+    description: text("description").notNull(),
+    forumId: uuid("forum_id")
+      .notNull()
+      .references(() => forumTable.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => userTable.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  });
+  
+  // Tabela de posts
+  export const postTable = pgTable("post", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    content: text("content").notNull(),
+    threadId: uuid("thread_id")
+      .notNull()
+      .references(() => threadTable.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => userTable.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  });
+  
+  // Relações da thread
+  export const threadRelations = relations(threadTable, ({ one, many }) => ({
+    forum: one(forumTable, {
+      fields: [threadTable.forumId],
+      references: [forumTable.id],
+    }),
+    user: one(userTable, {
+      fields: [threadTable.userId],
+      references: [userTable.id],
+    }),
+    posts: many(postTable),
+  }));
+  
+  // Relações do post
+  export const postRelations = relations(postTable, ({ one }) => ({
+    thread: one(threadTable, {
+      fields: [postTable.threadId],
+      references: [threadTable.id],
+    }),
+    user: one(userTable, {
+      fields: [postTable.userId],
+      references: [userTable.id],
+    }),
+  }));
 
 // Auth tables required by BetterAuth Drizzle adapter
 export const sessionTable = pgTable("session", {

@@ -1,7 +1,7 @@
 import crypto from "crypto";
 
 import { db } from ".";
-import { categoryTable, forumTable } from "./schema";
+import { forumTable, postTable, threadTable, userTable } from "./schema";
 
 function generateSlug(name: string): string {
   return name
@@ -11,89 +11,133 @@ function generateSlug(name: string): string {
     .trim();
 }
 
-// ✅ Corrigir os campos conforme o schema (title, slug, description)
-const categories = [
-  { title: "General Discussion" },
-  { title: "Development" },
-  { title: "Off Topic" },
-];
-
-const forums = [
-  {
-    title: "Welcome & Introductions",
-    description: "Apresente-se à comunidade!",
-    categoryTitle: "General Discussion",
-  },
-  {
-    title: "JavaScript",
-    description: "Tudo sobre JS moderno.",
-    categoryTitle: "Development",
-  },
-  {
-    title: "Random Chat",
-    description: "Assuntos variados.",
-    categoryTitle: "Off Topic",
-  },
-];
-
 async function main() {
-  console.log("🌱 Iniciando o seeding do banco de dados...");
+  console.log("🌱 Iniciando seed...");
 
   try {
-    // Limpar dados existentes
-    console.log("🧹 Limpando dados existentes...");
+    // Limpar tabelas na ordem correta (dependências primeiro)
+    console.log("🧹 Limpando tabelas...");
+    await db.delete(postTable);
+    await db.delete(threadTable);
     await db.delete(forumTable);
-    await db.delete(categoryTable);
-    console.log("✅ Dados limpos com sucesso!");
+    await db.delete(userTable);
 
-    // Inserir categorias primeiro
-    const categoryMap = new Map<string, string>();
+    console.log("✅ Tabelas limpas");
 
-    console.log("📂 Criando categorias...");
-    for (const categoryData of categories) {
-      const categoryId = crypto.randomUUID();
-      const categorySlug = generateSlug(categoryData.title);
+    // Criar usuários de exemplo
+    console.log("👤 Criando usuários...");
+    const users = [
+      { id: "u1", name: "Alice", email: "alice@example.com" },
+      { id: "u2", name: "Bob", email: "bob@example.com" },
+    ];
 
-      console.log(`  📁 Criando categoria: ${categoryData.title}`);
-
-      await db.insert(categoryTable).values({
-        id: categoryId,
-        title: categoryData.title,
-        slug: categorySlug,
+    for (const user of users) {
+      await db.insert(userTable).values({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        emailVerified: false,
+        role: "USER",
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
-
-      categoryMap.set(categoryData.title, categoryId);
     }
 
-    // Inserir fóruns
-    for (const forumData of forums) {
-      const forumId = crypto.randomUUID();
-      const forumSlug = generateSlug(forumData.title);
-      const categoryId = categoryMap.get(forumData.categoryTitle);
+    // Criar fóruns
+    console.log("📂 Criando fóruns...");
+    const forums: {
+      id: string;
+      category: "GAMING" | "POLITICA" | "VALE_TUDO";
+      title: string;
+      slug: string;
+      description: string;
+    }[] = [
+      {
+        id: crypto.randomUUID(),
+        category: "GAMING",
+        title: "Jogos em Geral",
+        slug: generateSlug("Jogos em Geral"),
+        description: "Discussões sobre games de todos os tipos",
+      },
+      {
+        id: crypto.randomUUID(),
+        category: "POLITICA",
+        title: "Debates Políticos",
+        slug: generateSlug("Debates Políticos"),
+        description: "Discussões sobre política nacional e internacional",
+      },
+    ];
 
-      if (!categoryId) {
-        throw new Error(`Categoria "${forumData.categoryTitle}" não encontrada`);
-      }
-
-      console.log(`📦 Criando fórum: ${forumData.title}`);
-
+    for (const forum of forums) {
       await db.insert(forumTable).values({
-        id: forumId,
-        title: forumData.title,
-        slug: forumSlug,
-        description: forumData.description,
-        categoryId,
+        ...forum,
+        createdAt: new Date(),
       });
     }
 
-    console.log("✅ Seeding concluído com sucesso!");
-    console.log(
-      `📊 Foram criadas ${categories.length} categorias, ${forums.length} fóruns.`,
-    );
-  } catch (error) {
-    console.error("❌ Erro durante o seeding:", error);
-    throw error;
+    // Criar threads
+    console.log("🧵 Criando threads...");
+    const threads = [
+      {
+        id: crypto.randomUUID(),
+        title: "Seu jogo favorito",
+        description: "Qual jogo você mais gosta e por quê?",
+        forumId: forums[0].id,
+        userId: "u1",
+      },
+      {
+        id: crypto.randomUUID(),
+        title: "Últimas eleições",
+        description: "O que achou do resultado das últimas eleições?",
+        forumId: forums[1].id,
+        userId: "u2",
+      },
+    ];
+
+    for (const thread of threads) {
+      await db.insert(threadTable).values({
+        ...thread,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+
+    // Criar posts
+    console.log("💬 Criando posts...");
+    const posts = [
+      {
+        id: crypto.randomUUID(),
+        content: "Eu gosto muito de The Witcher 3, pela história e ambientação.",
+        threadId: threads[0].id,
+        userId: "u1",
+      },
+      {
+        id: crypto.randomUUID(),
+        content: "Meu favorito é Hollow Knight. Ótima trilha sonora!",
+        threadId: threads[0].id,
+        userId: "u2",
+      },
+      {
+        id: crypto.randomUUID(),
+        content: "Acho que o resultado foi surpreendente, não esperava.",
+        threadId: threads[1].id,
+        userId: "u2",
+      },
+    ];
+
+    for (const post of posts) {
+      await db.insert(postTable).values({
+        ...post,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+
+    console.log("✅ Seed concluído com sucesso!");
+  } catch (err) {
+    console.error("❌ Erro no seed:", err);
+    process.exit(1);
   }
 }
 
-main().catch(console.error);
+main();

@@ -14,6 +14,7 @@ export const userTable = pgTable("user", {
     emailVerified: boolean("email_verified")
     .$defaultFn(() => false)
     .notNull(),
+    image: text("image").$type<string | null>().default(null),
     role: roleEnum("role").notNull().default("USER"),
     createdAt: timestamp("created_at")
     .$defaultFn(() => /* @__PURE__ */ new Date())
@@ -134,4 +135,13 @@ export const accountTable = pgTable("account", {
     password: text("password"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow()
+});
+
+export const verificationTable = pgTable("verification", {
+  id: text('id').primaryKey(),
+  identifier: text('identifier').notNull(),
+value: text('value').notNull(),
+expiresAt: timestamp('expires_at').notNull(),
+createdAt: timestamp('created_at').$defaultFn(() => /* @__PURE__ */ new Date()),
+updatedAt: timestamp('updated_at').$defaultFn(() => /* @__PURE__ */ new Date())
 });

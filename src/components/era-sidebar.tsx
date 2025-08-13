@@ -21,7 +21,7 @@ const mainNav = [
   { title: "Forums", icon: Home, url: "#" },
   { title: "Gaming Forum", icon: Gamepad2, url: "/forums/gaming" },
   { title: "Gaming Hangouts", icon: MessageSquare, url: "#" },
-  { title: "Etcetera Forum", icon: MessageSquareText, url: "/forums/etcetera" },
+  { title: "Vale Tudo", icon: MessageSquareText, url: "/forums/vale-tudo" },
   { title: "Etcetera Hangouts", icon: BookOpen, url: "#" },
   { title: "Gaming Headlines", icon: Newspaper, url: "#" },
   { title: "Trending Threads", icon: Flame, url: "#" },

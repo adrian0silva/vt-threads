@@ -4,7 +4,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import {AppSidebar} from "@/components/app-sidebar";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { EraSidebar } from "@/components/era-sidebar";
+import { SiteHeader } from "@/components/site-header";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
 
 const geistSans = Geist({
@@ -30,9 +32,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
       <SidebarProvider>
-          
+      <EraSidebar />
+      <SidebarInset>
+        <SiteHeader />
             {children}
-          
+            </SidebarInset>
         </SidebarProvider>
       </body>
     </html>

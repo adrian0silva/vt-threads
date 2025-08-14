@@ -1,12 +1,13 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { PlusIcon } from 'lucide-react';
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { db } from "@/db";
-import { forumTable, threadTable } from "@/db/schema";
+import { forumTable, postTable, threadTable, userTable } from "@/db/schema";
 
 interface ForumPageProps {
   params: Promise<{ slug: string }>;
@@ -23,9 +24,31 @@ const ForumDetailsPage = async ({ params }: ForumPageProps) => {
     return notFound();
   }
 
-  const threads = await db.query.threadTable.findMany({
-    where: eq(threadTable.forumId, forumEncontrado.id),
-  });
+  const threads = await db
+  .select({
+    id: threadTable.id,
+    title: threadTable.title,
+    slug: threadTable.slug,
+    description: threadTable.description,
+    createdAt: threadTable.createdAt,
+    views: threadTable.views,
+    postsCount: sql<number>`COUNT(${postTable.id})`.mapWith(Number),
+    userName: userTable.name,  // nome do usuário
+    userAvatar: userTable.image, // avatar do usuário
+  })
+  .from(threadTable)
+  .leftJoin(postTable, eq(postTable.threadId, threadTable.id))
+  .leftJoin(userTable, eq(threadTable.userId, userTable.id))
+  .where(eq(threadTable.forumId, forumEncontrado.id))
+  .groupBy(
+    threadTable.id,
+    threadTable.title,
+    threadTable.slug,
+    threadTable.description,
+    threadTable.views,
+    userTable.name,
+    userTable.image // precisa entrar no groupBy também
+  );
 
   return (
     <>
@@ -37,13 +60,15 @@ const ForumDetailsPage = async ({ params }: ForumPageProps) => {
             <h1 className="text-2xl font-bold text-gray-900">{forumEncontrado.title}</h1>
             <p className="text-sm text-gray-600 mt-1">{forumEncontrado.description}</p>
           </div>
-          <Button 
+          <Link href={`/forums/${slug}/post-thread`}>
+            <Button 
             className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 font-medium"
             size="sm"
           >
             <PlusIcon className="w-4 h-4 mr-2" />
             Post thread
           </Button>
+          </Link>
         </div>
 
         {threads.length === 0 ? (
@@ -66,8 +91,8 @@ const ForumDetailsPage = async ({ params }: ForumPageProps) => {
                   {/* Avatar do autor */}
                   <Avatar className="w-10 h-10 flex-shrink-0">
                     <AvatarImage
-                      src={thread.userId || "/placeholder.svg"}
-                      alt={thread.userId}
+                      src={thread.userAvatar || "/placeholder.svg"}
+                      alt={thread.userAvatar}
                     />
                     <AvatarFallback className="bg-gray-600 text-white">
                       {thread.title.charAt(0).toUpperCase()}
@@ -76,13 +101,15 @@ const ForumDetailsPage = async ({ params }: ForumPageProps) => {
 
                   {/* Conteúdo principal */}
                   <div className="flex-1 min-w-0">
+                    <Link href={`/threads/${thread.slug}`}>
                     <h3 className="text-white font-medium text-sm mb-1 line-clamp-2">
                       {thread.title}
                     </h3>
+                    </Link>
                     <div className="flex items-center gap-2 text-xs text-gray-400">
-                      <span>{thread.title}</span>
-                      <span>•</span>
-                      <span>{thread.description}</span>
+                      <span>{thread.userName}</span>
+                      <span>-</span>
+                      <span>{JSON.stringify(thread.createdAt)}</span>
                     </div>
                   </div>
 
@@ -90,11 +117,11 @@ const ForumDetailsPage = async ({ params }: ForumPageProps) => {
                   <div className="flex items-center gap-6 text-xs">
                     <div className="text-center">
                       <div className="text-gray-400 mb-1">Replies:</div>
-                      <div className="text-white font-medium">qualqur coisa</div>
+                      <div className="text-white font-medium">{thread.postsCount}</div>
                     </div>
                     <div className="text-center">
                       <div className="text-gray-400 mb-1">Views:</div>
-                      <div className="text-white font-medium">start to panic</div>
+                      <div className="text-white font-medium">{thread.views}</div>
                     </div>
                   </div>
                 </div>

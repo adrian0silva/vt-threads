@@ -18,11 +18,11 @@ export function SiteHeader() {
     return (
       <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <SidebarTrigger className="-ml-1" />
-          <Link href="/" className="font-semibold">
+
+        <div className="mx-auto flex h-14 max-w-7xl items-center gap-2 px-4">
+        <Link href="/" className="font-semibold">
             Logo
           </Link>
-        <div className="mx-auto flex h-14 max-w-7xl items-center gap-2 px-4">
-
   
           <div className="mx-auto hidden max-w-xl flex-1 items-center md:flex">
             <div className="relative w-full">

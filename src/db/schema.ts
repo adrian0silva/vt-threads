@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { boolean, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, integer, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 export const roleEnum = pgEnum("role", [
     "ADMINISTRATOR",
@@ -59,6 +59,7 @@ export const forumRelations = relations(forumTable, ({ one, many }) => ({
 export const threadTable = pgTable("thread", {
     id: uuid("id").primaryKey().defaultRandom(),
     title: text("title").notNull(),
+    slug: text("slug").notNull().unique(),
     description: text("description").notNull(),
     forumId: uuid("forum_id")
       .notNull()
@@ -66,6 +67,7 @@ export const threadTable = pgTable("thread", {
     userId: text("user_id")
       .notNull()
       .references(() => userTable.id, { onDelete: "cascade" }),
+    views: integer("views").notNull().default(0),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
   });

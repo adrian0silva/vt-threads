@@ -5,7 +5,7 @@ import ForumList from "@/components/common/forum-list";
 import { EraSidebar } from "@/components/era-sidebar";
 import { ForumCard } from "@/components/forum-card";
 import { RightRail } from "@/components/right-rail";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/components/site-header-client";
 import { Card, CardContent } from "@/components/ui/card";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { db } from "@/db";

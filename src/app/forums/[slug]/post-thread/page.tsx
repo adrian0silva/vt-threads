@@ -20,7 +20,7 @@ import {
   Underline,
   Undo,
 } from "lucide-react"
-import { useParams } from "next/navigation"
+import { useParams,useRouter } from "next/navigation"
 import type React from "react"
 import { useEffect, useState } from "react"
 
@@ -42,6 +42,7 @@ interface Forum {
   }
 
 const PostThread = () => {
+  const router = useRouter()
   const params = useParams()
   const forumSlug = params.slug
 
@@ -81,7 +82,7 @@ const PostThread = () => {
       });
     
       if (res.ok) {
-        alert("Thread created!");
+        router.push(`/forums/${forumSlug}`)
         setTitle("");
         setMessage("");
       } else {

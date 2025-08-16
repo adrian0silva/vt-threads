@@ -32,6 +32,7 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
       userId: threadTable.userId,
       userName: userTable.name,
       userAvatar: userTable.image,
+      createdAt: threadTable.createdAt,
     })
     .from(threadTable)
     .leftJoin(userTable, eq(threadTable.userId, userTable.id))
@@ -58,33 +59,38 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
 
   const posts = await postsQuery.execute()
 
-  const displayPosts = posts.map((post) => ({
-    id: post.id,
-    author: post.userName || "Anonymous",
+  const initialPost = {
+    id: `thread-${thread.id}`,
+    author: thread.userName || "Anonymous",
     title: "Member",
     joinDate: "Unknown",
     posts: "0",
     likes: "0",
-    content: post.content,
-    timestamp: new Date(post.createdAt).toLocaleString(),
-    isOriginalPoster: post.userId === thread.userId,
-    userAvatar: post.userAvatar,
-  }))
+    content: thread.description || "",
+    timestamp: new Date(thread.createdAt).toLocaleString(),
+    isOriginalPoster: true,
+    userAvatar: thread.userAvatar,
+  }
+
+  const displayPosts = [
+    initialPost,
+    ...posts.map((post) => ({
+      id: post.id,
+      author: post.userName || "Anonymous",
+      title: "Member",
+      joinDate: "Unknown",
+      posts: "0",
+      likes: "0",
+      content: post.content,
+      timestamp: new Date(post.createdAt).toLocaleString(),
+      isOriginalPoster: post.userId === thread.userId,
+      userAvatar: post.userAvatar,
+    })),
+  ]
 
   return (
     <div className="mx-auto max-w-6xl p-4">
       {/* Browser Warning */}
-      <div className="mb-6 rounded-lg border border-orange-300 bg-orange-100 p-3 text-sm">
-        <p className="text-orange-800">
-          You are using an out of date browser. It may not display this or other websites correctly. You should upgrade
-          or use an{" "}
-          <a href="#" className="text-blue-600 underline">
-            alternative browser
-          </a>
-          .
-        </p>
-      </div>
-
       {/* Breadcrumb */}
       <nav className="mb-6 flex items-center space-x-2 text-sm text-gray-600">
         <a href="#" className="hover:text-blue-600">
@@ -100,28 +106,8 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
         </a>
       </nav>
 
-      {/* Thread Header */}
       <div className="mb-6">
         <h1 className="mb-4 text-2xl font-bold">{thread.title}</h1>
-
-        {thread.description && (
-          <div className="mb-4 border-l-4 border-blue-500 bg-gray-50 p-4">
-            <div className="flex items-start space-x-4">
-              <Avatar className="h-12 w-12 flex-shrink-0">
-                <AvatarImage
-                  src={
-                    thread.userAvatar ||
-                    `/placeholder.svg?height=48&width=48&query=${thread.userName || "/placeholder.svg"}`
-                  }
-                />
-                <AvatarFallback>{(thread.userName || "A").slice(0, 2).toUpperCase()}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <p className="whitespace-pre-line text-gray-700">{thread.description}</p>
-              </div>
-            </div>
-          </div>
-        )}
 
         <div className="flex items-center space-x-4 text-sm text-gray-600">
           <div className="flex items-center space-x-2">
@@ -195,7 +181,7 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
         </Card>
       )}
 
-      <ReplyForm threadId={thread.id} userId={session?.user?.id} isAuthenticated={!!session?.user} forum={slug}/>
+      <ReplyForm threadId={thread.id} userId={session?.user?.id} isAuthenticated={!!session?.user} forum={slug} />
 
       {/* Thread Stats */}
       <div className="mt-6 flex items-center justify-between text-sm text-gray-600">

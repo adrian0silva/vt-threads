@@ -1,6 +1,7 @@
 "use client"
 
 import { Bell, ChevronDown, LogOutIcon, Search, SettingsIcon } from 'lucide-react'
+import Image from "next/image"
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
@@ -21,8 +22,14 @@ export function SiteHeader() {
 
         <div className="mx-auto flex h-14 max-w-7xl items-center gap-2 px-4">
         <Link href="/" className="font-semibold">
-            Logo
-          </Link>
+          <Image
+            src="/vtboards.png"
+            alt=""
+            width={64}
+            height={64}
+            className="rounded bg-inherit"
+          />
+        </Link>
   
           <div className="mx-auto hidden max-w-xl flex-1 items-center md:flex">
             <div className="relative w-full">

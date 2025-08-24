@@ -1,14 +1,15 @@
 // app/api/forums/[slug]/route.ts
 import { eq } from "drizzle-orm"
+import { NextRequest } from "next/server"
 
 import { db } from "@/db"
 import { forumTable } from "@/db/schema"
 
 export async function GET(
-  req: Request,
-  { params }: { params: { slug: string } } // aqui vem o slug corretamente
+  req: NextRequest,
+  context: { params: { slug: string } } // ⚠ correto agora
 ) {
-  const slug = params.slug
+  const slug = context.params.slug
   console.log("slug", slug)
 
   const forum = await db.query.forumTable.findFirst({

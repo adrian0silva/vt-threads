@@ -20,7 +20,7 @@ import {
   Underline,
   Undo,
 } from "lucide-react"
-import { useParams,useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import type React from "react"
 import { useEffect, useState } from "react"
 
@@ -31,15 +31,13 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { db } from "@/db";
-import { threadTable } from "@/db/schema"
 import { authClient } from "@/lib/auth-client"
 interface Forum {
-    id: string
-    title: string
-    slug: string
-    // outras propriedades...
-  }
+  id: string
+  title: string
+  slug: string
+  // outras propriedades...
+}
 
 const PostThread = () => {
   const router = useRouter()
@@ -52,43 +50,51 @@ const PostThread = () => {
   const [watchThread, setWatchThread] = useState(false)
   const [emailNotifications, setEmailNotifications] = useState(false)
   const [forumEncontrado, setForumEncontrado] = useState<Forum | null>(null)
-  const {data: session} = authClient.useSession();
-  console.log('forumSlug')
+  const { data: session } = authClient.useSession()
+  console.log("forumSlug")
   console.log(forumSlug)
   useEffect(() => {
     async function fetchForum() {
-      const forum = await fetch(`/api/forums/${forumSlug}`).then(res => res.json())
+      const forum = await fetch(`/api/forums/${forumSlug}`).then((res) => res.json())
       setForumEncontrado(forum)
     }
     fetchForum()
   }, [forumSlug])
 
-  console.log('forumEncontrado')
+  console.log("forumEncontrado")
   console.log(forumEncontrado)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     console.log({ title, message, tags, watchThread, emailNotifications })
-    console.log('forumEncontrado')
+    console.log("forumEncontrado")
     console.log(forumEncontrado)
     const res = await fetch("/api/threads", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          description: message,
-          forumId: forumEncontrado?.id,
-          userId: session?.user.id,
-        }),
-      });
-    
-      if (res.ok) {
-        router.push(`/forums/${forumSlug}`)
-        setTitle("");
-        setMessage("");
-      } else {
-        const data = await res.json();
-        alert("Error: " + data.error);
-      }
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title,
+        description: message,
+        forumId: forumEncontrado?.id,
+        userId: session?.user.id,
+      }),
+    })
+
+    if (res.ok) {
+      router.push(`/forums/${forumSlug}`)
+      setTitle("")
+      setMessage("")
+    } else {
+      const data = await res.json()
+      alert("Error: " + data.error)
+    }
+  }
+
+  const handleWatchThreadChange = (checked: boolean | "indeterminate") => {
+    setWatchThread(checked === true)
+  }
+
+  const handleEmailNotificationsChange = (checked: boolean | "indeterminate") => {
+    setEmailNotifications(checked === true)
   }
 
   return (
@@ -261,7 +267,7 @@ const PostThread = () => {
               <Label className="text-sm font-medium text-gray-700">Options:</Label>
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="watch-thread" checked={watchThread} onCheckedChange={setWatchThread} />
+                  <Checkbox id="watch-thread" checked={watchThread} onCheckedChange={handleWatchThreadChange} />
                   <Label htmlFor="watch-thread" className="text-sm text-gray-700">
                     Watch this thread...
                   </Label>
@@ -270,7 +276,7 @@ const PostThread = () => {
                   <Checkbox
                     id="email-notifications"
                     checked={emailNotifications}
-                    onCheckedChange={setEmailNotifications}
+                    onCheckedChange={handleEmailNotificationsChange}
                   />
                   <Label htmlFor="email-notifications" className="text-sm text-gray-700">
                     and receive email notifications

@@ -95,6 +95,7 @@ async function main() {
     ];
 
     for (const thread of threads) {
+      // @ts-expect-error: seed only
       await db.insert(threadTable).values({
         ...thread,
         createdAt: new Date(),

@@ -1,14 +1,14 @@
 import { eq } from "drizzle-orm"
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 
 import { db } from "@/db"
 import {  postTable, threadTable } from "@/db/schema"
 
 export async function GET(
-  req: Request,
-  { params }: { params: { slug: string } } // aqui vem o slug corretamente
+  req: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }// aqui vem o slug corretamente
 ) {
-  const slug = params.slug
+  const { slug } = await params
   console.log("slug", slug)
 
   const thread = await db.query.forumTable.findFirst({

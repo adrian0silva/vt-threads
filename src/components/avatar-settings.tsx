@@ -28,18 +28,17 @@ export function AvatarSettings({ user }: AvatarSettingsProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image: secureUrl, userId: user.id }),
-      });
-  
-      if (!res.ok) throw new Error("Falha ao salvar avatar no banco");
-  
-      setPreviewUrl(secureUrl);
-      toast.success("Avatar atualizado com sucesso!");
+      })
+
+      if (!res.ok) throw new Error("Falha ao salvar avatar no banco")
+
+      setPreviewUrl(secureUrl)
+      toast.success("Avatar atualizado com sucesso!")
     } catch (err) {
-      console.error(err);
-      toast.error("Erro ao salvar avatar no banco.");
+      console.error(err)
+      toast.error("Erro ao salvar avatar no banco.")
     }
-  };
-  
+  }
 
   const handleRemoveAvatar = async () => {
     try {
@@ -73,10 +72,14 @@ export function AvatarSettings({ user }: AvatarSettingsProps) {
             signatureEndpoint="/api/sign-image"
             options={{ folder: "avatars" }} // opcional: pasta no Cloudinary
             onSuccess={(result) => {
-                // result contém a URL da imagem
-                console.log("Imagem enviada:", result.info.secure_url);
-                handleUpload(result.info.secure_url); // função que salva no banco
-              }}
+              if (result.info && typeof result.info === "object" && "secure_url" in result.info) {
+                console.log("Imagem enviada:", result.info.secure_url)
+                handleUpload(result.info.secure_url as string) // função que salva no banco
+              } else {
+                console.error("Upload result missing secure_url")
+                toast.error("Erro no upload: URL da imagem não encontrada")
+              }
+            }}
           >
             <Button type="button" variant="outline">
               <Upload className="mr-2 h-4 w-4" />

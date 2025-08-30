@@ -10,6 +10,7 @@ import { authClient } from "@/lib/auth-client"
 
 import { LoginDialog } from "./login-dialog"
 import { RegisterDialog } from "./register-dialog"
+import { ThemeSwitcher } from "./theme-switcher";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu"
 import { SidebarTrigger } from "./ui/sidebar"
@@ -35,6 +36,7 @@ export function SiteHeader() {
         </div>
 
         <nav className="ml-auto flex items-center gap-1">
+          <ThemeSwitcher />
           {session?.user ? (
             <>
               <DropdownMenu>

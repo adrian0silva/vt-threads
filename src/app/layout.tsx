@@ -6,6 +6,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import {AppSidebar} from "@/components/app-sidebar";
 import { EraSidebar } from "@/components/era-sidebar";
 import { SiteHeader } from "@/components/site-header";
+import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
 
@@ -27,17 +28,24 @@ export const metadata: Metadata = {
 export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-      <SidebarProvider>
-      <EraSidebar />
-      <SidebarInset>
-        <SiteHeader />
-            {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <SidebarProvider>
+            <EraSidebar />
+            <SidebarInset>
+              <SiteHeader />
+              {children}
             </SidebarInset>
-        </SidebarProvider>
+          </SidebarProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

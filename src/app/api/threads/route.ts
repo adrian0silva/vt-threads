@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { db } from "@/db";
 import { threadTable } from "@/db/schema";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth"
 
 function generateSlug(name: string): string {
     const randomString = Math.random().toString(36).substring(2, 7);
@@ -20,7 +20,7 @@ const createThreadSchema = z.object({
 });
 
 export async function POST(req: Request) {
-  const session = await auth.getSession();
+  const session = await auth.api.getSession(  {headers: await import("next/headers").then((mod) => mod.headers()),});
 
   if (!session?.user) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
   const validation = createThreadSchema.safeParse(body);
 
   if (!validation.success) {
-    return new Response(JSON.stringify({ error: validation.error.errors }), { status: 400 });
+    return new Response(JSON.stringify({ error: validation.error.message }), { status: 400 });
   }
 
   const { title, description, forumId } = validation.data;

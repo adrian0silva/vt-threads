@@ -1,5 +1,16 @@
-import { BarChart3, FileText, GamepadIcon, GitGraphIcon, Home, LineChartIcon, Menu,MessageSquareIcon,Settings, Users } from 'lucide-react'
-import * as React from "react"
+import {
+  BarChart3,
+  FileText,
+  GamepadIcon,
+  GitGraphIcon,
+  Home,
+  LineChartIcon,
+  Menu,
+  MessageSquareIcon,
+  Settings,
+  Users,
+} from "lucide-react";
+import * as React from "react";
 
 import {
   Sidebar,
@@ -13,7 +24,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 // Dados do menu
 const menuItems = [
@@ -29,7 +40,7 @@ const menuItems = [
   },
   {
     title: "Gaming",
-    url: "/forums/gaming",
+    url: "/forums/jogos-em-geral",
     icon: GamepadIcon,
   },
   {
@@ -42,7 +53,7 @@ const menuItems = [
     url: "/em-alta",
     icon: LineChartIcon,
   },
-]
+];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -52,7 +63,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="#">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                   <Menu className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -64,7 +75,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      
+
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel> </SidebarGroupLabel>
@@ -84,7 +95,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      
+
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -95,8 +106,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
-      
+
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

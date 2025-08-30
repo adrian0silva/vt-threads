@@ -1,6 +1,16 @@
-"use client"
+"use client";
 
-import { BookOpen, Flame, Gamepad2, Home, MessageSquare, MessageSquareText, Newspaper, Settings, Ticket } from 'lucide-react'
+import {
+  BookOpen,
+  Flame,
+  Gamepad2,
+  Home,
+  MessageSquare,
+  MessageSquareText,
+  Newspaper,
+  Settings,
+  Ticket,
+} from "lucide-react";
 
 import {
   Sidebar,
@@ -16,25 +26,20 @@ import {
   SidebarMenuItem,
   SidebarRail,
   SidebarTrigger,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 const mainNav = [
   { title: "Forums", icon: Home, url: "#" },
-  { title: "Gaming Forum", icon: Gamepad2, url: "/forums/gaming" },
-  { title: "Gaming Hangouts", icon: MessageSquare, url: "#" },
+  { title: "Gaming Forum", icon: Gamepad2, url: "/forums/jogos-em-geral" },
   { title: "Vale Tudo", icon: MessageSquareText, url: "/forums/vale-tudo" },
-  { title: "Etcetera Hangouts", icon: BookOpen, url: "#" },
-  { title: "Gaming Headlines", icon: Newspaper, url: "#" },
   { title: "Trending Threads", icon: Flame, url: "#" },
   { title: "Latest Threads", icon: Newspaper, url: "#" },
-  { title: "Tickets", icon: Ticket, url: "#" },
-]
+];
 
 export function EraSidebar(props: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarContent>
-
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -76,5 +81,5 @@ export function EraSidebar(props: React.ComponentProps<typeof Sidebar>) {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

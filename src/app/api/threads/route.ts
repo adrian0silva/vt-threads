@@ -1,28 +1,46 @@
+import { z } from "zod";
+
 import { db } from "@/db";
 import { threadTable } from "@/db/schema";
+import { auth } from "@/lib/auth"
 
 function generateSlug(name: string): string {
+    const randomString = Math.random().toString(36).substring(2, 7);
     return name
       .toLowerCase()
       .replace(/[^a-z0-9\s-]/g, "")
       .replace(/\s+/g, "-")
-      .trim();
+      .trim() + `-${randomString}`;
 }
 
-export async function POST(req: Request) {
-  const body = await req.json();
-  const { title, description, forumId, userId } = body;
+const createThreadSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().min(1),
+  forumId: z.string().uuid(),
+});
 
-  if (!title || !description) {
-    return new Response(JSON.stringify({ error: "Title and description required" }), { status: 400 });
+export async function POST(req: Request) {
+  const session = await auth.api.getSession(  {headers: await import("next/headers").then((mod) => mod.headers()),});
+
+  if (!session?.user) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
   }
+
+  const body = await req.json();
+  const validation = createThreadSchema.safeParse(body);
+
+  if (!validation.success) {
+    return new Response(JSON.stringify({ error: validation.error.message }), { status: 400 });
+  }
+
+  const { title, description, forumId } = validation.data;
 
   const thread = await db.insert(threadTable).values({
     title,
     slug: generateSlug(title),
     description,
     forumId,
-    userId,
+    userId: session.user.id,
   });
 
   return new Response(JSON.stringify(thread));

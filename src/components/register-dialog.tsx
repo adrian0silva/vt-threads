@@ -236,13 +236,13 @@ export function RegisterDialog() {
               <Checkbox id="tos" required />
               <Label htmlFor="tos" className="text-sm font-normal">
                 Aceito os{" "}
-                <Link href="/terms" className="underline">
+                {/* <Link href="/terms" className="underline">
                   Termos
                 </Link>{" "}
                 e a{" "}
                 <Link href="/privacy" className="underline">
                   Privacidade
-                </Link>
+                </Link> */}
               </Label>
             </div>
 

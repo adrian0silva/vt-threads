@@ -9,7 +9,7 @@ export default async function SettingsPage() {
   })
 
   if (!session) {
-    redirect("/login")
+    redirect("/")
   }
 
   return (

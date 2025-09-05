@@ -7,7 +7,7 @@ import { Button } from "./ui/button";
 
 interface SidebarButtonProps {
   children: React.ReactNode;
-  href: string;
+  href: string; // string normal
 }
 
 const SidebarButton = ({ children, href }: SidebarButtonProps) => {
@@ -15,11 +15,11 @@ const SidebarButton = ({ children, href }: SidebarButtonProps) => {
 
   return (
     <Button
-      variant={pathName === `${href}` ? "secondary" : "ghost"}
+      variant={pathName === href ? "secondary" : "ghost"}
       className="justify-start gap-2"
       asChild
     >
-      <Link href={href}>{children}</Link>
+      <Link href={href as any}>{children}</Link>
     </Button>
   );
 };

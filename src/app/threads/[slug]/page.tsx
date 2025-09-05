@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm"
 import { ChevronRight, Clock, Eye, MessageSquare, User } from "lucide-react"
 import { headers } from "next/headers"
+import Image from "next/image"
 
 import { ReplyForm } from "@/components/reply-form"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -106,7 +107,7 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
             case "image":
               return (
                 <div key={index} className="rounded-lg overflow-hidden border">
-                  <img
+                  <Image
                     src={element.data?.url || "/placeholder.svg"}
                     alt={`Imagem ${index + 1}`}
                     className="w-full h-auto max-h-96 object-cover"

@@ -1,9 +1,11 @@
-export function parseBBCode(content: string) {
-    const elements: Array<{
-      type: "text" | "image" | "youtube" | "twitter"
-      content: string
-      data?: unknown
-    }> = []
+type BBCodeElement =
+  | { type: "text"; content: string }
+  | { type: "image"; content: string; data: { url: string } }
+  | { type: "youtube"; content: string; data: { id: string } }
+  | { type: "twitter"; content: string; data: { id: string; url: string } }
+
+export function parseBBCode(content: string): BBCodeElement[] {
+    const elements: BBCodeElement[] = []
   
     // Regex patterns for BBCode tags
     const patterns = [

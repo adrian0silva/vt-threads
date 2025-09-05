@@ -1,31 +1,117 @@
-"use client"
+"use client";
 
-import { MessageSquare } from "lucide-react"
-import type React from "react"
-import { useState } from "react"
+import {
+  HelpCircle,
+  ImageIcon,
+  MessageSquare,
+  Plus,
+  Send,
+  Twitter,
+  X,
+  Youtube,
+} from "lucide-react";
+import type React from "react";
+import { useState } from "react";
 
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Collapsible, CollapsibleContent } from "./ui/collapsible";
+import { Input } from "./ui/input";
 
 interface ReplyFormProps {
-  threadId: string
-  userId?: string
-  isAuthenticated: boolean,
-  forum: string
+  threadId: string;
+  userId?: string;
+  isAuthenticated: boolean;
+  forum: string;
 }
 
-export function ReplyForm({ threadId, userId, isAuthenticated, forum }: ReplyFormProps) {
-  const [content, setContent] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
+export function ReplyForm({
+  threadId,
+  userId,
+  isAuthenticated,
+  forum,
+}: ReplyFormProps) {
+  const [content, setContent] = useState("");
+  const [images, setImages] = useState<Array<{ url: string; alt?: string }>>(
+    [],
+  );
+  const [videos, setVideos] = useState<
+    Array<{ id: string; title?: string; platform: "youtube" }>
+  >([]);
+  const [embeds, setEmbeds] = useState<
+    Array<{ id: string; url: string; platform: "twitter" }>
+  >([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showHelp, setShowHelp] = useState(false)
 
+  const [newImageUrl, setNewImageUrl] = useState("");
+  const [newImageAlt, setNewImageAlt] = useState("");
+  const [newVideoUrl, setNewVideoUrl] = useState("");
+  const [newEmbedUrl, setNewEmbedUrl] = useState("");
+
+  const extractYoutubeId = (url: string): string | null => {
+    const regex =
+      /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+  };
+
+  const extractTweetId = (url: string): string | null => {
+    const regex = /twitter\.com\/\w+\/status\/(\d+)|x\.com\/\w+\/status\/(\d+)/;
+    const match = url.match(regex);
+    return match ? match[1] || match[2] : null;
+  };
+
+  const addImage = () => {
+    if (newImageUrl.trim()) {
+      setImages([
+        ...images,
+        { url: newImageUrl.trim(), alt: newImageAlt.trim() || undefined },
+      ]);
+      setNewImageUrl("");
+      setNewImageAlt("");
+    }
+  };
+
+  const addVideo = () => {
+    const videoId = extractYoutubeId(newVideoUrl);
+    if (videoId) {
+      setVideos([...videos, { id: videoId, platform: "youtube" }]);
+      setNewVideoUrl("");
+    }
+  };
+
+  const addEmbed = () => {
+    const tweetId = extractTweetId(newEmbedUrl);
+    if (tweetId) {
+      setEmbeds([
+        ...embeds,
+        { id: tweetId, url: newEmbedUrl.trim(), platform: "twitter" },
+      ]);
+      setNewEmbedUrl("");
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setImages(images.filter((_, i) => i !== index));
+  };
+
+  const removeVideo = (index: number) => {
+    setVideos(videos.filter((_, i) => i !== index));
+  };
+
+  const removeEmbed = (index: number) => {
+    setEmbeds(embeds.filter((_, i) => i !== index));
+  };
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
+    if (!content.trim()) return;
 
-    if (!content.trim()) return
-
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
       const res = await fetch(`/api/threads/${forum}/add-reply`, {
@@ -36,59 +122,170 @@ export function ReplyForm({ threadId, userId, isAuthenticated, forum }: ReplyFor
           threadId,
           userId,
         }),
-      })
+      });
 
       if (res.ok) {
-        setContent("")
+        setContent("");
         // Refresh the page to show the new post
-        window.location.reload()
+        window.location.reload();
       } else {
-        const data = await res.json()
-        alert("Error: " + (data.error || "Failed to create post"))
+        const data = await res.json();
+        alert("Error: " + (data.error || "Failed to create post"));
       }
     } catch (error) {
-      alert("Error: Failed to create post")
+      alert("Error: Failed to create post");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   if (!isAuthenticated) {
     return (
       <Card className="mt-8 border-blue-200 bg-blue-50 p-6 text-center">
         <div className="mb-4 flex items-center justify-center">
           <MessageSquare className="mr-2 h-8 w-8 text-blue-600" />
-          <h3 className="text-lg font-semibold text-blue-900">Join the conversation!</h3>
+          <h3 className="text-lg font-semibold text-blue-900">
+            Join the conversation!
+          </h3>
         </div>
-        <p className="mb-4 text-gray-700">You must log in or register to reply to this thread.</p>
+        <p className="mb-4 text-gray-700">
+          You must log in or register to reply to this thread.
+        </p>
         <div className="flex items-center justify-center space-x-3">
           <Button variant="outline">Log in</Button>
           <Button>Register</Button>
         </div>
       </Card>
-    )
+    );
   }
-
+  const hasContent =
+    content.trim() ||
+    images.length > 0 ||
+    videos.length > 0 ||
+    embeds.length > 0;
+    const insertBBCode = (tag: string, placeholder = "") => {
+      const textarea = document.getElementById("post-content") as HTMLTextAreaElement
+      if (!textarea) return
+  
+      const start = textarea.selectionStart
+      const end = textarea.selectionEnd
+      const selectedText = content.substring(start, end)
+      const replacement = selectedText || placeholder
+  
+      const newContent = content.substring(0, start) + `[${tag}]${replacement}[/${tag}]` + content.substring(end)
+  
+      setContent(newContent)
+  
+      // Reposicionar cursor
+      setTimeout(() => {
+        const newPosition = start + tag.length + 2 + replacement.length
+        textarea.focus()
+        textarea.setSelectionRange(newPosition, newPosition)
+      }, 0)
+    }
   return (
-    <Card className="mt-8 p-6">
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <Card className="w-full">
+      <CardHeader className="pb-4">
+        <div className="flex items-center gap-3">
+          <CardTitle className="text-lg">Criar novo post</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
         <div>
-          <Label htmlFor="reply-content">Reply to this thread</Label>
+          <div className="mb-2 flex items-center justify-between">
+            <label htmlFor="post-content" className="text-sm font-medium">
+              Conteúdo do post
+            </label>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowHelp(!showHelp)}
+              className="gap-1 text-xs"
+            >
+              <HelpCircle className="h-3 w-3" />
+              BBCode
+            </Button>
+          </div>
+
+          <Collapsible open={showHelp} onOpenChange={setShowHelp}>
+            <CollapsibleContent className="mb-3">
+              <div className="bg-muted space-y-2 rounded-md p-3 text-sm">
+                <p className="font-medium">Use BBCode para adicionar mídia:</p>
+                <div className="grid grid-cols-1 gap-2 text-xs md:grid-cols-2">
+                  <div>
+                    <code className="bg-background rounded px-1">
+                      [img]URL_DA_IMAGEM[/img]
+                    </code>
+                    <p className="text-muted-foreground">Para imagens</p>
+                  </div>
+                  <div>
+                    <code className="bg-background rounded px-1">
+                      [youtube]ID_OU_URL[/youtube]
+                    </code>
+                    <p className="text-muted-foreground">
+                      Para vídeos do YouTube
+                    </p>
+                  </div>
+                  <div>
+                    <code className="bg-background rounded px-1">
+                      [twitter]ID_OU_URL[/twitter]
+                    </code>
+                    <p className="text-muted-foreground">Para tweets</p>
+                  </div>
+                </div>
+                <p className="text-muted-foreground text-xs">
+                  Exemplo: Texto normal [img]https://exemplo.com/foto.jpg[/img]
+                  mais texto [youtube]dQw4w9WgXcQ[/youtube]
+                </p>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+
           <Textarea
-            id="reply-content"
-            placeholder="Write your reply..."
+            id="post-content"
+            placeholder="Escreva seu post aqui... Use [img]URL[/img] para imagens, [youtube]ID[/youtube] para vídeos, [twitter]URL[/twitter] para tweets"
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="mt-2 min-h-[120px]"
-            disabled={isSubmitting}
+            className="min-h-[150px] resize-none font-mono text-sm"
           />
         </div>
-        <div className="flex justify-end">
-          <Button type="submit" disabled={!content.trim() || isSubmitting}>
-            {isSubmitting ? "Posting..." : "Post Reply"}
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => insertBBCode("img", "URL_DA_IMAGEM")}
+            className="text-xs"
+          >
+            + Imagem
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => insertBBCode("youtube", "ID_OU_URL_YOUTUBE")}
+            className="text-xs"
+          >
+            + YouTube
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => insertBBCode("twitter", "URL_DO_TWEET")}
+            className="text-xs"
+          >
+            + Twitter
           </Button>
         </div>
-      </form>
+        <div className="flex justify-end">
+          <Button
+            onClick={handleSubmit}
+            disabled={!hasContent || isSubmitting}
+            className="gap-2"
+          >
+            <Send className="h-4 w-4" />
+            {isSubmitting ? "Publicando..." : "Publicar"}
+          </Button>
+        </div>
+      </CardContent>
     </Card>
-  )
+  );
 }

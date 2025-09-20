@@ -111,7 +111,7 @@ const ForumDetailsPage = async ({ params }: ForumPageProps) => {
                     {/* Conteúdo principal */}
                     <div className="min-w-0 flex-1">
                       <Link href={`/threads/${thread.slug}`}>
-                        <h3 className="mb-1 line-clamp-2 text-sm font-medium text-white">
+                        <h3 className="mb-1 line-clamp-2 text-sm font-medium text-white hover:underline">
                           {thread.title}
                         </h3>
                       </Link>

@@ -44,72 +44,72 @@
 }
 
 :root {
-  --radius: 0.65rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.141 0.005 285.823);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.141 0.005 285.823);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.141 0.005 285.823);
-  --primary: oklch(0.606 0.25 292.717);
-  --primary-foreground: oklch(0.969 0.016 293.756);
-  --secondary: oklch(0.967 0.001 286.375);
-  --secondary-foreground: oklch(0.21 0.006 285.885);
-  --muted: oklch(0.967 0.001 286.375);
-  --muted-foreground: oklch(0.552 0.016 285.938);
-  --accent: oklch(0.967 0.001 286.375);
-  --accent-foreground: oklch(0.21 0.006 285.885);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.92 0.004 286.32);
-  --input: oklch(0.92 0.004 286.32);
-  --ring: oklch(0.606 0.25 292.717);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.141 0.005 285.823);
-  --sidebar-primary: oklch(0.606 0.25 292.717);
-  --sidebar-primary-foreground: oklch(0.969 0.016 293.756);
-  --sidebar-accent: oklch(0.967 0.001 286.375);
-  --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
-  --sidebar-border: oklch(0.92 0.004 286.32);
-  --sidebar-ring: oklch(0.606 0.25 292.717);
+  --background: oklch(0.98 0.02 95);     /* Amarelo maçã dourada */
+  --foreground: oklch(0.15 0.02 290);    /* Preto/roxo escuro */
+
+  --primary: oklch(0.65 0.25 30);        /* Vermelho caótico */
+  --primary-foreground: oklch(0.98 0.01 95); /* Amarelo claro */
+
+  --secondary: oklch(0.7 0.2 310);       /* Roxo discordiano */
+  --secondary-foreground: oklch(0.99 0.01 95);
+
+  --accent: oklch(0.8 0.25 150);         /* Verde ácido */
+  --accent-foreground: oklch(0.15 0.01 290);
+
+  --muted: oklch(0.9 0.05 250);          /* Lilás suave */
+  --muted-foreground: oklch(0.35 0.12 290);
+
+  --destructive: oklch(0.55 0.25 30);    /* Vermelho mais profundo */
+  --border: oklch(0.7 0.03 95);
+  --input: oklch(0.9 0.05 95);
+  --ring: oklch(0.75 0.2 310);
+
+  --sidebar: oklch(0.15 0.02 290);       /* Fundo escuro */
+  --sidebar-foreground: oklch(0.98 0.02 95); /* Texto dourado */
+  --sidebar-primary: oklch(0.65 0.25 30);
+  --sidebar-primary-foreground: oklch(0.99 0.01 95);
+  --sidebar-accent: oklch(0.8 0.25 150);
+  --sidebar-accent-foreground: oklch(0.15 0.01 290);
+  --sidebar-border: oklch(0.7 0.03 95);
+  --sidebar-ring: oklch(0.75 0.2 310);
 }
 
+
 .dark {
-  --background: oklch(0.141 0.005 285.823);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.21 0.006 285.885);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.21 0.006 285.885);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.541 0.281 293.009);
-  --primary-foreground: oklch(0.969 0.016 293.756);
-  --secondary: oklch(0.274 0.006 286.033);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.274 0.006 286.033);
-  --muted-foreground: oklch(0.705 0.015 286.067);
-  --accent: oklch(0.274 0.006 286.033);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.541 0.281 293.009);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.21 0.006 285.885);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.541 0.281 293.009);
-  --sidebar-primary-foreground: oklch(0.969 0.016 293.756);
-  --sidebar-accent: oklch(0.274 0.006 286.033);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.541 0.281 293.009);
+ /* === Tema Éris II — Caos Solar === */
+ --background: oklch(0.95 0.15 95);        /* laranja queimado */
+ --foreground: oklch(0.05 0.01 285);       /* preto dramático */
+
+ --card: oklch(0.97 0.12 95);
+ --card-foreground: var(--foreground);
+
+ --primary: oklch(0.65 0.28 25);           /* vermelho vivo */
+ --primary-foreground: oklch(0.95 0.15 95);
+
+ --secondary: oklch(0.40 0.15 310);        /* roxo intenso */
+ --secondary-foreground: var(--foreground);
+
+ --accent: oklch(0.85 0.25 150);           /* verde-limão ácido */
+ --accent-foreground: var(--foreground);
+
+ --muted: oklch(0.90 0.10 95);
+ --muted-foreground: var(--foreground);
+
+ --destructive: oklch(0.70 0.25 20);       /* vermelho profundo */
+
+ --border: oklch(0.80 0.12 95);
+ --input: oklch(0.92 0.12 95);
+ --ring: var(--primary);
+
+ /* sidebar */
+ --sidebar: oklch(0.90 0.15 95);
+ --sidebar-foreground: var(--foreground);
+ --sidebar-primary: var(--primary);
+ --sidebar-primary-foreground: var(--primary-foreground);
+ --sidebar-accent: var(--secondary);
+ --sidebar-accent-foreground: var(--secondary-foreground);
+ --sidebar-border: oklch(0.80 0.12 95);
+ --sidebar-ring: var(--primary);
 }
 
 @layer base {

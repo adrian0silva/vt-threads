@@ -3,6 +3,7 @@
 import { Slot } from "@radix-ui/react-slot"
 import { cva, VariantProps } from "class-variance-authority"
 import { PanelLeftIcon } from "lucide-react"
+import Image from "next/image"
 import * as React from "react"
 
 import { Button } from "@/components/ui/button"
@@ -273,7 +274,13 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      <PanelLeftIcon />
+      <Image
+        src="/eris-apple.png" // substitua pelo seu logo
+        alt="Maçã de Éris"
+        width={32} // ajuste o tamanho conforme necessário
+        height={32}
+        className="rounded-full"
+      />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )

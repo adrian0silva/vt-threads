@@ -2,7 +2,6 @@
 import { eq } from "drizzle-orm";
 
 import ForumList from "@/components/common/forum-list";
-import { EraSidebar } from "@/components/era-sidebar";
 import { ForumCard } from "@/components/forum-card";
 import { RightRail } from "@/components/right-rail";
 import { SiteHeaderClient } from "@/components/site-header-client";

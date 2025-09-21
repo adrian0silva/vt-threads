@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import {AppSidebar} from "@/components/app-sidebar";
-import { EraSidebar } from "@/components/era-sidebar";
+import { ForumSidebar } from "@/components/forum-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -39,7 +39,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           disableTransitionOnChange
         >
           <SidebarProvider>
-            <EraSidebar />
+            <ForumSidebar />
             <SidebarInset>
               <SiteHeader />
               {children}

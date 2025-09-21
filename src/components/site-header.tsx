@@ -21,13 +21,20 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <SidebarTrigger className="-ml-1" />
-
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-2 px-4">
-        <Link href="/" className="font-semibold">
-          <Image src="/vtboards.png" alt="" width={64} height={64} className="rounded bg-inherit" />
+            {/* Trigger + Logo sempre colados */}
+      <div className="flex items-center flex-none gap-2">
+        <SidebarTrigger />
+        <Link href="/" className="flex-none">
+          <Image
+            src="/erislogo.png"
+            alt="Logo"
+            width={64}
+            height={64}
+            className="rounded bg-inherit"
+          />
         </Link>
-
+      </div>
         <div className="mx-auto hidden max-w-xl flex-1 items-center md:flex">
           <div className="relative w-full">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />

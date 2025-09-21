@@ -36,12 +36,11 @@ const mainNav = [
   { title: "Latest Threads", icon: Newspaper, url: "#" },
 ];
 
-export function EraSidebar(props: React.ComponentProps<typeof Sidebar>) {
+export function ForumSidebar(props: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainNav.map((item) => (

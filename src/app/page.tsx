@@ -1,4 +1,5 @@
 import { Apple, Crown, Sparkles, Zap } from "lucide-react";
+import Link from "next/link";
 
 import { RightRail } from "@/components/right-rail";
 import { SiteHeaderClient } from "@/components/site-header-client";
@@ -131,7 +132,13 @@ export default async function Home() {
                           <CardContent className="p-4">
                             <div className="space-y-2">
                               <h4 className="text-lg font-bold transition-colors group-hover:text-purple-600">
-                                {forum.title}
+                                <Link
+                                  className="hover:underline"
+                                  href={`/forums/${forum.slug}`}
+                                >
+                                  {" "}
+                                  {forum.title}{" "}
+                                </Link>
                               </h4>
                               <p className="line-clamp-2 text-sm text-gray-600">
                                 {forum.description}

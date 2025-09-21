@@ -233,23 +233,25 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
           </a>
         </nav>
 
-        {/* Thread Header with Discordian Flair */}
-        <div className="mb-6 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 p-6 text-white shadow-lg">
-          <h1 className="mb-4 text-3xl font-bold">{thread.title}</h1>
+        {/* Thread Header with Responsive Discordian Flair */}
+        <div className="mb-6 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 p-4 text-white shadow-lg md:p-6">
+          <h1 className="mb-4 text-xl font-bold break-words md:text-3xl">
+            {thread.title}
+          </h1>
 
-          <div className="flex items-center space-x-6 text-sm">
+          <div className="flex flex-col space-y-3 text-sm md:flex-row md:items-center md:space-y-0 md:space-x-6">
             <div className="flex items-center space-x-2">
               <div className="flex items-center space-x-1">
                 <User className="h-4 w-4" />
-                <span>Erisian Creator</span>
-                <a href="#" className="font-medium hover:underline">
+                <span className="hidden md:inline">Erisian Creator</span>
+                <a href="#" className="truncate font-medium hover:underline">
                   {thread.userName || "Anonymous Erisian"}
                 </a>
               </div>
             </div>
             <div className="flex items-center space-x-1">
               <Clock className="h-4 w-4" />
-              <span>Chaos Began</span>
+              <span className="hidden md:inline">Chaos Began</span>
               <span>38 minutes ago</span>
             </div>
             <div className="flex items-center space-x-1">
@@ -267,8 +269,73 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
                 key={post.id}
                 className="overflow-hidden border-2 p-0 transition-all duration-300 hover:border-purple-300 hover:shadow-lg"
               >
-                <div className="flex">
-                  {/* User Info Sidebar with Discordian Colors */}
+                {/* Layout Mobile: Avatar em cima */}
+                <div className="block md:hidden">
+                  {/* Header Mobile com Avatar */}
+                  <div className="border-b bg-gradient-to-r from-purple-50 to-pink-50 p-4">
+                    <div className="flex items-center space-x-3">
+                      <Avatar className="h-12 w-12 border-2 border-purple-300">
+                        <AvatarImage
+                          src={
+                            post.userAvatar ||
+                            `/placeholder.svg?height=48&width=48&query=${post.author || "/placeholder.svg"}`
+                          }
+                        />
+                        <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+                          {post.author.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <h3 className="cursor-pointer font-semibold text-purple-600 hover:text-purple-800 hover:underline">
+                            {post.author}
+                          </h3>
+                          <Badge
+                            variant="secondary"
+                            className="bg-purple-100 text-xs text-purple-700"
+                          >
+                            {post.title}
+                          </Badge>
+                          {post.isOriginalPoster && (
+                            <Badge
+                              variant="default"
+                              className="bg-gradient-to-r from-green-500 to-blue-500 text-xs"
+                            >
+                              🍎 OP
+                            </Badge>
+                          )}
+                        </div>
+
+                        <div className="mt-1 flex items-center space-x-3 text-xs text-purple-600">
+                          <span>Posts: {post.posts}</span>
+                          <span>Likes: {post.likes}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between">
+                      <span className="text-sm text-gray-600">
+                        {post.timestamp}
+                      </span>
+                      <Badge
+                        variant="outline"
+                        className="border-orange-300 text-xs text-orange-600"
+                      >
+                        ⚡ Erisian Message
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Content Mobile */}
+                  <div className="bg-white p-4">
+                    {renderBBCodeContent(post.content)}
+                  </div>
+                </div>
+
+                {/* Layout Desktop: Avatar do lado */}
+                <div className="hidden md:flex">
+                  {/* User Info Sidebar - Desktop */}
                   <div className="w-48 border-r bg-gradient-to-b from-purple-50 to-pink-50 p-4">
                     <div className="text-center">
                       <Avatar className="mx-auto mb-2 h-16 w-16 border-2 border-purple-300">
@@ -307,8 +374,8 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
                     </div>
                   </div>
 
-                  {/* Post Content with Enhanced Styling */}
-                  <div className="flex-[2] bg-white p-4">
+                  {/* Post Content Desktop */}
+                  <div className="flex-1 bg-white p-4">
                     <div className="mb-3 flex items-center justify-between">
                       <span className="text-sm text-gray-600">
                         {post.timestamp}

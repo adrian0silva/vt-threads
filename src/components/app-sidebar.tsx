@@ -1,14 +1,11 @@
 import {
-  BarChart3,
+  Apple,
+  Crown,
   FileText,
   GamepadIcon,
-  GitGraphIcon,
   Home,
   LineChartIcon,
-  Menu,
   MessageSquareIcon,
-  Settings,
-  Users,
 } from "lucide-react";
 import * as React from "react";
 
@@ -29,27 +26,27 @@ import {
 // Dados do menu
 const menuItems = [
   {
-    title: "Forums",
+    title: "🌪️ Chaos Forums",
     url: "/",
     icon: Home,
   },
   {
-    title: "Vale tudo",
+    title: "⚡ Vale Tudo Chaos",
     url: "/forums/vale-tudo",
     icon: MessageSquareIcon,
   },
   {
-    title: "Gaming",
+    title: "🍎 Gaming Chaos",
     url: "/forums/jogos-em-geral",
     icon: GamepadIcon,
   },
   {
-    title: "Ultimos topicos",
+    title: "📰 Latest Erisian Topics",
     url: "/ultimos-topicos",
     icon: FileText,
   },
   {
-    title: "Em Alta",
+    title: "🔥 Trending Chaos",
     url: "/em-alta",
     icon: LineChartIcon,
   },
@@ -63,12 +60,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="#">
-                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <Menu className="size-4" />
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+                  <Apple className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">VT Threads</span>
-                  <span className="truncate text-xs"></span>
+                  <span className="truncate font-semibold">🌪️ Chaos Forum</span>
+                  <span className="truncate text-xs text-purple-600">
+                    Principia Discordia
+                  </span>
                 </div>
               </a>
             </SidebarMenuButton>
@@ -100,8 +99,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton>
-              <Users />
-              <span>Usuário Logado</span>
+              <Crown />
+              <span>👑 Erisian User</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

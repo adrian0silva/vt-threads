@@ -1,26 +1,28 @@
-"use client"
+"use client";
 
-import { Upload, X } from "lucide-react"
-import { CldUploadButton } from "next-cloudinary"
-import { useState } from "react"
-import { toast } from "sonner"
+import { Upload, X } from "lucide-react";
+import { CldUploadButton } from "next-cloudinary";
+import { useState } from "react";
+import { toast } from "sonner";
 
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
-import { Button } from "./ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Button } from "./ui/button";
 
 interface User {
-  id: string
-  name?: string | null
-  email?: string | null
-  image?: string | null
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
 }
 
 interface AvatarSettingsProps {
-  user: User
+  user: User;
 }
 
 export function AvatarSettings({ user }: AvatarSettingsProps) {
-  const [previewUrl, setPreviewUrl] = useState<string | null>(user.image ?? null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    user.image ?? null,
+  );
 
   const handleUpload = async (secureUrl: string) => {
     try {
@@ -28,39 +30,42 @@ export function AvatarSettings({ user }: AvatarSettingsProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image: secureUrl, userId: user.id }),
-      })
+      });
 
-      if (!res.ok) throw new Error("Falha ao salvar avatar no banco")
+      if (!res.ok) throw new Error("Falha ao salvar avatar no banco");
 
-      setPreviewUrl(secureUrl)
-      toast.success("Avatar atualizado com sucesso!")
+      setPreviewUrl(secureUrl);
+      toast.success("Avatar atualizado com sucesso!");
     } catch (err) {
-      console.error(err)
-      toast.error("Erro ao salvar avatar no banco.")
+      console.error(err);
+      toast.error("Erro ao salvar avatar no banco.");
     }
-  }
+  };
 
   const handleRemoveAvatar = async () => {
     try {
       await fetch("/api/user/avatar", {
         method: "DELETE",
-      })
+      });
 
-      setPreviewUrl(null)
-      toast.success("Avatar removido com sucesso!")
-      window.location.reload()
+      setPreviewUrl(null);
+      toast.success("Avatar removido com sucesso!");
+      window.location.reload();
     } catch (error) {
-      console.error("Error removing avatar:", error)
-      toast.error("Falha ao remover o avatar. Tente novamente.")
+      console.error("Error removing avatar:", error);
+      toast.error("Falha ao remover o avatar. Tente novamente.");
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4">
-        <Avatar className="h-20 w-20">
-          <AvatarImage src={previewUrl || undefined} alt={user.name || "User"} />
-          <AvatarFallback className="text-lg">
+        <Avatar className="h-20 w-20 border-2 border-purple-300">
+          <AvatarImage
+            src={previewUrl || undefined}
+            alt={user.name || "Erisian User"}
+          />
+          <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-lg text-white">
             {user.name?.split(" ")?.[0]?.[0]}
             {user.name?.split(" ")?.[1]?.[0]}
           </AvatarFallback>
@@ -72,30 +77,47 @@ export function AvatarSettings({ user }: AvatarSettingsProps) {
             signatureEndpoint="/api/sign-image"
             options={{ folder: "avatars" }} // opcional: pasta no Cloudinary
             onSuccess={(result) => {
-              if (result.info && typeof result.info === "object" && "secure_url" in result.info) {
-                console.log("Imagem enviada:", result.info.secure_url)
-                handleUpload(result.info.secure_url as string) // função que salva no banco
+              if (
+                result.info &&
+                typeof result.info === "object" &&
+                "secure_url" in result.info
+              ) {
+                console.log("Imagem enviada:", result.info.secure_url);
+                handleUpload(result.info.secure_url as string); // função que salva no banco
               } else {
-                console.error("Upload result missing secure_url")
-                toast.error("Erro no upload: URL da imagem não encontrada")
+                console.error("Upload result missing secure_url");
+                toast.error("Erro no upload: URL da imagem não encontrada");
               }
             }}
           >
-            <Button type="button" variant="outline">
+            <Button
+              type="button"
+              variant="outline"
+              className="border-purple-300 text-purple-600 hover:bg-purple-50"
+            >
               <Upload className="mr-2 h-4 w-4" />
-              Alterar Avatar
+              🍎 Change Sacred Avatar
             </Button>
           </CldUploadButton>
           {previewUrl && (
-            <Button type="button" variant="outline" size="sm" onClick={handleRemoveAvatar}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleRemoveAvatar}
+              className="border-purple-300 text-purple-600 hover:bg-purple-50"
+            >
               <X className="mr-2 h-4 w-4" />
-              Remover
+              🗑️ Remove Sacred Avatar
             </Button>
           )}
         </div>
       </div>
 
-      <p className="text-sm text-muted-foreground">Upload direto no Cloudinary. Formatos aceitos: JPG, PNG, GIF.</p>
+      <p className="text-sm text-purple-600">
+        🍎 Upload direto no Cloudinary. Formatos sagrados aceitos: JPG, PNG,
+        GIF.
+      </p>
     </div>
-  )
+  );
 }

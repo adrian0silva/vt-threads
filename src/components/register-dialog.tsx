@@ -95,13 +95,17 @@ export function RegisterDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Register</Button>
+        <Button className="bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600">
+          🌪️ Join Chaos
+        </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-red-50 sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Criar conta</DialogTitle>
-          <DialogDescription>
-            Preencha seus dados para começar.
+          <DialogTitle className="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-2xl font-bold text-transparent">
+            🌪️ Join the Chaos
+          </DialogTitle>
+          <DialogDescription className="text-orange-600">
+            Preencha seus dados Erisianos para começar sua jornada no caos.
           </DialogDescription>
         </DialogHeader>
 
@@ -246,8 +250,12 @@ export function RegisterDialog() {
               </Label>
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Criando conta..." : "Criar conta"}
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600"
+              disabled={loading}
+            >
+              {loading ? "🌪️ Creating Chaos..." : "🌪️ Join Chaos"}
             </Button>
           </form>
         </Form>

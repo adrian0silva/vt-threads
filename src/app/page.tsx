@@ -86,7 +86,7 @@ export default async function Home() {
         {/* Chaos Navigation */}
         <div className="mb-6">
           <h2 className="mb-4 text-2xl font-bold text-gray-800">
-            🌈 Chaos Forums - Where Order Meets Its Demise
+            🌈 Fnord Forums - Where Order Meets Its Demise
           </h2>
           <p className="mb-6 text-gray-600">
             Welcome to the Discordian Society! Here, we embrace chaos, celebrate

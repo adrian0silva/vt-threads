@@ -1,4 +1,2 @@
 User-agent: *
-Allow: /
-Sitemap: https://www.vtforums.com.br/sitemap.xml
-Host: https://www.vtforums.com.br
+Disallow: /

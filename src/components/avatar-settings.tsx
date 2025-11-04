@@ -60,12 +60,12 @@ export function AvatarSettings({ user }: AvatarSettingsProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4">
-        <Avatar className="h-20 w-20 border-2 border-purple-300">
+        <Avatar className="h-20 w-20 border-2 border-gray-300">
           <AvatarImage
             src={previewUrl || undefined}
-            alt={user.name || "Erisian User"}
+            alt={user.name || "Usuário"}
           />
-          <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-lg text-white">
+          <AvatarFallback className="bg-gray-100 text-lg text-gray-600">
             {user.name?.split(" ")?.[0]?.[0]}
             {user.name?.split(" ")?.[1]?.[0]}
           </AvatarFallback>
@@ -93,10 +93,10 @@ export function AvatarSettings({ user }: AvatarSettingsProps) {
             <Button
               type="button"
               variant="outline"
-              className="border-purple-300 text-purple-600 hover:bg-purple-50"
+              className="border-gray-300 text-gray-700 hover:bg-gray-50"
             >
               <Upload className="mr-2 h-4 w-4" />
-              🍎 Change Sacred Avatar
+              Alterar Avatar
             </Button>
           </CldUploadButton>
           {previewUrl && (
@@ -105,18 +105,17 @@ export function AvatarSettings({ user }: AvatarSettingsProps) {
               variant="outline"
               size="sm"
               onClick={handleRemoveAvatar}
-              className="border-purple-300 text-purple-600 hover:bg-purple-50"
+              className="border-gray-300 text-gray-700 hover:bg-gray-50"
             >
               <X className="mr-2 h-4 w-4" />
-              🗑️ Remove Sacred Avatar
+              Remover Avatar
             </Button>
           )}
         </div>
       </div>
 
-      <p className="text-sm text-purple-600">
-        🍎 Upload direto no Cloudinary. Formatos sagrados aceitos: JPG, PNG,
-        GIF.
+      <p className="text-sm text-gray-600">
+        Upload direto no Cloudinary. Formatos aceitos: JPG, PNG, GIF.
       </p>
     </div>
   );

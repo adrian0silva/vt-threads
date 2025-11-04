@@ -1,15 +1,5 @@
 import { eq } from "drizzle-orm";
-import {
-  Apple,
-  ChevronRight,
-  Clock,
-  Crown,
-  Eye,
-  MessageSquare,
-  Sparkles,
-  User,
-  Zap,
-} from "lucide-react";
+import { ChevronRight, Clock, Eye, MessageSquare, User } from "lucide-react";
 import { headers } from "next/headers";
 import Image from "next/image";
 
@@ -73,9 +63,9 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
 
   const initialPost = {
     id: `thread-${thread.id}`,
-    author: thread.userName || "Anonymous Erisian",
-    title: "Discordian",
-    joinDate: "Unknown",
+    author: thread.userName || "Usuário Anônimo",
+    title: "Membro",
+    joinDate: "Desconhecido",
     posts: "0",
     likes: "0",
     content: thread.description || "",
@@ -88,9 +78,9 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
     initialPost,
     ...posts.map((post) => ({
       id: post.id,
-      author: post.userName || "Anonymous Erisian",
-      title: "Discordian",
-      joinDate: "Unknown",
+      author: post.userName || "Usuário Anônimo",
+      title: "Membro",
+      joinDate: "Desconhecido",
       posts: "0",
       likes: "0",
       content: post.content,
@@ -123,7 +113,7 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
               return (
                 <div
                   key={index}
-                  className="overflow-hidden rounded-lg border-2 border-purple-300 shadow-lg"
+                  className="overflow-hidden rounded-lg border border-gray-200 shadow-md"
                 >
                   <Image
                     src={element.data?.url || "/placeholder.svg"}
@@ -137,7 +127,7 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
               return (
                 <div
                   key={index}
-                  className="aspect-video overflow-hidden rounded-lg border-2 border-orange-300 shadow-lg"
+                  className="aspect-video overflow-hidden rounded-lg border border-gray-200 shadow-md"
                 >
                   <iframe
                     src={`https://www.youtube.com/embed/${element.data?.id}`}
@@ -153,7 +143,7 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
               return (
                 <div
                   key={index}
-                  className="rounded-lg border-2 border-blue-300 bg-gradient-to-br from-blue-50 to-purple-50 p-4 shadow-lg"
+                  className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-md"
                 >
                   <div className="mb-2 flex items-center gap-2">
                     <div className="flex h-4 w-4 items-center justify-center rounded-sm bg-blue-500">
@@ -186,55 +176,36 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
     );
   };
 
-  // Discordian quotes for random display
-  const erisianQuotes = [
-    "We Discordians must stick apart!",
-    "Nothing is true, everything is permitted",
-    "All Hail Eris! All Hail Discordia!",
-    "Chaos is the natural order of things",
-    "Confusion is the beginning of wisdom",
-  ];
-
-  const randomQuote =
-    erisianQuotes[Math.floor(Math.random() * erisianQuotes.length)];
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
+    <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-7xl space-y-6 p-6">
-        {/* Discordian Header */}
+        {/* Header */}
         <div className="mb-8 text-center">
-          <div className="mb-4 flex items-center justify-center gap-2">
-            <Sparkles className="h-6 w-6 animate-pulse text-yellow-500" />
-            <h1 className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 bg-clip-text text-3xl font-bold text-transparent">
-              🌪️ Chaos Thread 🌪️
-            </h1>
-            <Sparkles className="h-6 w-6 animate-pulse text-yellow-500" />
-          </div>
-          <p className="text-sm text-gray-600 italic">
-            &quot;{randomQuote}&quot; - Principia Discordia
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Tópico de Discussão
+          </h1>
         </div>
 
-        {/* Discordian Breadcrumb */}
-        <nav className="mb-6 flex items-center space-x-2 rounded-lg bg-white/50 p-3 text-sm text-gray-600 shadow-sm">
-          <a href="#" className="flex items-center gap-1 hover:text-purple-600">
-            <Apple className="h-4 w-4" />
-            Forums
+        {/* Breadcrumb */}
+        <nav className="mb-6 flex items-center space-x-2 rounded-lg bg-white p-3 text-sm text-gray-600 shadow-sm">
+          <a href="#" className="flex items-center gap-1 hover:text-blue-600">
+            <MessageSquare className="h-4 w-4" />
+            Fóruns
           </a>
           <ChevronRight className="h-4 w-4" />
-          <a href="#" className="flex items-center gap-1 hover:text-purple-600">
-            <Crown className="h-4 w-4" />
-            Discordian Society
+          <a href="#" className="flex items-center gap-1 hover:text-blue-600">
+            <MessageSquare className="h-4 w-4" />
+            Categoria
           </a>
           <ChevronRight className="h-4 w-4" />
-          <a href="#" className="flex items-center gap-1 hover:text-purple-600">
-            <Zap className="h-4 w-4" />
-            Vale Tudo Chaos
+          <a href="#" className="flex items-center gap-1 hover:text-blue-600">
+            <MessageSquare className="h-4 w-4" />
+            Fórum
           </a>
         </nav>
 
-        {/* Thread Header with Responsive Discordian Flair */}
-        <div className="mb-6 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 p-4 text-white shadow-lg md:p-6">
+        {/* Thread Header */}
+        <div className="mb-6 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white shadow-lg md:p-6">
           <h1 className="mb-4 text-xl font-bold break-words md:text-3xl">
             {thread.title}
           </h1>
@@ -243,71 +214,69 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
             <div className="flex items-center space-x-2">
               <div className="flex items-center space-x-1">
                 <User className="h-4 w-4" />
-                <span className="hidden md:inline">Erisian Creator</span>
+                <span className="hidden md:inline">Autor:</span>
                 <a href="#" className="truncate font-medium hover:underline">
-                  {thread.userName || "Anonymous Erisian"}
+                  {thread.userName || "Usuário Anônimo"}
                 </a>
               </div>
             </div>
             <div className="flex items-center space-x-1">
               <Clock className="h-4 w-4" />
-              <span className="hidden md:inline">Chaos Began</span>
-              <span>38 minutes ago</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Zap className="h-4 w-4" />
-              <span>Chaos Level: {Math.floor(Math.random() * 10) + 1}/10</span>
+              <span className="hidden md:inline">Criado em:</span>
+              <span>
+                {new Date(thread.createdAt).toLocaleDateString("pt-BR")}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Posts with Discordian Styling */}
+        {/* Posts */}
         {displayPosts.length > 0 ? (
           <div className="space-y-6">
             {displayPosts.map((post) => (
               <Card
                 key={post.id}
-                className="overflow-hidden border-2 p-0 transition-all duration-300 hover:border-purple-300 hover:shadow-lg"
+                className="overflow-hidden border border-gray-200 bg-white p-0 transition-all duration-300 hover:border-gray-300 hover:shadow-md"
               >
                 {/* Layout Mobile: Avatar em cima */}
                 <div className="block md:hidden">
                   {/* Header Mobile com Avatar */}
-                  <div className="border-b bg-gradient-to-r from-purple-50 to-pink-50 p-4">
+                  <div className="border-b bg-gray-50 p-4">
                     <div className="flex items-center space-x-3">
-                      <Avatar className="h-12 w-12 border-2 border-purple-300">
+                      <Avatar className="h-12 w-12 border border-gray-200">
                         <AvatarImage
                           src={
                             post.userAvatar ||
                             `/placeholder.svg?height=48&width=48&query=${post.author || "/placeholder.svg"}`
                           }
                         />
-                        <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+                        <AvatarFallback className="bg-gray-100 text-gray-600">
                           {post.author.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
 
                       <div className="flex-1">
                         <div className="flex items-center space-x-2">
-                          <h3 className="cursor-pointer font-semibold text-purple-600 hover:text-purple-800 hover:underline">
+                          <h3 className="cursor-pointer font-semibold text-gray-900 hover:text-blue-600 hover:underline">
                             {post.author}
                           </h3>
                           <Badge
                             variant="secondary"
-                            className="bg-purple-100 text-xs text-purple-700"
+                            className="bg-gray-100 text-xs text-gray-700"
                           >
                             {post.title}
                           </Badge>
                           {post.isOriginalPoster && (
                             <Badge
                               variant="default"
-                              className="bg-gradient-to-r from-green-500 to-blue-500 text-xs"
+                              className="bg-blue-600 text-xs"
                             >
-                              🍎 OP
+                              OP
                             </Badge>
                           )}
                         </div>
 
-                        <div className="mt-1 flex items-center space-x-3 text-xs text-purple-600">
+                        <div className="mt-1 flex items-center space-x-3 text-xs text-gray-600">
                           <span>Posts: {post.posts}</span>
                           <span>Likes: {post.likes}</span>
                         </div>
@@ -320,9 +289,9 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
                       </span>
                       <Badge
                         variant="outline"
-                        className="border-orange-300 text-xs text-orange-600"
+                        className="border-gray-300 text-xs text-gray-600"
                       >
-                        ⚡ Erisian Message
+                        Mensagem
                       </Badge>
                     </div>
                   </div>
@@ -336,39 +305,39 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
                 {/* Layout Desktop: Avatar do lado */}
                 <div className="hidden md:flex">
                   {/* User Info Sidebar - Desktop */}
-                  <div className="w-48 border-r bg-gradient-to-b from-purple-50 to-pink-50 p-4">
+                  <div className="w-48 border-r bg-gray-50 p-4">
                     <div className="text-center">
-                      <Avatar className="mx-auto mb-2 h-16 w-16 border-2 border-purple-300">
+                      <Avatar className="mx-auto mb-2 h-16 w-16 border border-gray-200">
                         <AvatarImage
                           src={
                             post.userAvatar ||
                             `/placeholder.svg?height=64&width=64&query=${post.author || "/placeholder.svg"}`
                           }
                         />
-                        <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+                        <AvatarFallback className="bg-gray-100 text-gray-600">
                           {post.author.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <h3 className="cursor-pointer font-semibold text-purple-600 hover:text-purple-800 hover:underline">
+                      <h3 className="cursor-pointer font-semibold text-gray-900 hover:text-blue-600 hover:underline">
                         {post.author}
                       </h3>
                       <Badge
                         variant="secondary"
-                        className="mb-2 bg-purple-100 text-xs text-purple-700"
+                        className="mb-2 bg-gray-100 text-xs text-gray-700"
                       >
                         {post.title}
                       </Badge>
                       {post.isOriginalPoster && (
                         <Badge
                           variant="default"
-                          className="mb-2 bg-gradient-to-r from-green-500 to-blue-500 text-xs"
+                          className="mb-2 bg-blue-600 text-xs"
                         >
-                          🍎 OP
+                          OP
                         </Badge>
                       )}
                     </div>
-                    <div className="mt-3 space-y-1 text-xs text-purple-600">
-                      <div>Joined: {post.joinDate}</div>
+                    <div className="mt-3 space-y-1 text-xs text-gray-600">
+                      <div>Membro desde: {post.joinDate}</div>
                       <div>Posts: {post.posts}</div>
                       <div>Likes: {post.likes}</div>
                     </div>
@@ -382,9 +351,9 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
                       </span>
                       <Badge
                         variant="outline"
-                        className="border-orange-300 text-xs text-orange-600"
+                        className="border-gray-300 text-xs text-gray-600"
                       >
-                        ⚡ Erisian Message
+                        Mensagem
                       </Badge>
                     </div>
                     {renderBBCodeContent(post.content)}
@@ -394,13 +363,13 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
             ))}
           </div>
         ) : (
-          <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-8 text-center">
-            <MessageSquare className="mx-auto mb-4 h-12 w-12 text-purple-400" />
-            <h3 className="mb-2 text-lg font-semibold text-purple-600">
-              No chaos yet
+          <Card className="border border-gray-200 bg-gray-50 p-8 text-center">
+            <MessageSquare className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+            <h3 className="mb-2 text-lg font-semibold text-gray-700">
+              Ainda não há mensagens
             </h3>
-            <p className="text-purple-500">
-              Be the first to spread Erisian wisdom!
+            <p className="text-gray-600">
+              Seja o primeiro a responder a este tópico!
             </p>
           </Card>
         )}
@@ -412,63 +381,27 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
           forum={slug}
         />
 
-        {/* Discordian Thread Stats */}
-        <div className="mt-6 rounded-lg border-2 border-orange-200 bg-gradient-to-r from-orange-100 to-red-100 p-4">
+        {/* Thread Stats */}
+        <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-1 text-orange-700">
+              <div className="flex items-center space-x-1 text-gray-700">
                 <Eye className="h-4 w-4" />
-                <span>{thread.views || 1247} chaos observers</span>
+                <span>{thread.views || 1247} visualizações</span>
               </div>
-              <div className="flex items-center space-x-1 text-orange-700">
+              <div className="flex items-center space-x-1 text-gray-700">
                 <MessageSquare className="h-4 w-4" />
-                <span>{displayPosts.length} Erisian replies</span>
-              </div>
-              <div className="flex items-center space-x-1 text-orange-700">
-                <Apple className="h-4 w-4" />
-                <span>
-                  Chaos Level: {Math.floor(Math.random() * 10) + 1}/10
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-orange-700">Spread Chaos:</span>
-              <div className="flex space-x-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs hover:bg-orange-200"
-                >
-                  🌪️ Discordian Share
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs hover:bg-orange-200"
-                >
-                  ⚡ Erisian Broadcast
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs hover:bg-orange-200"
-                >
-                  🍎 Golden Apple
-                </Button>
+                <span>{displayPosts.length} respostas</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Discordian Footer */}
+        {/* Footer */}
         <div className="mt-8 text-center">
-          <div className="rounded-lg border-2 border-purple-200 bg-gradient-to-r from-purple-100 to-pink-100 p-4">
-            <h3 className="mb-2 text-sm font-bold text-purple-800">
-              🌟 All Hail Eris! All Hail Discordia! 🌟
-            </h3>
-            <p className="text-xs text-purple-600">
-              &quot;We Discordians must stick apart!&quot; - Malaclypse the
-              Younger
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <p className="text-xs text-gray-600">
+              VT Forums - Fórum de Discussão
             </p>
           </div>
         </div>

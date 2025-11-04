@@ -141,25 +141,25 @@ export function ReplyForm({
 
   if (!isAuthenticated) {
     return (
-      <Card className="mt-8 border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6 text-center">
+      <Card className="mt-8 border border-gray-200 bg-gray-50 p-6 text-center">
         <div className="mb-4 flex items-center justify-center">
-          <MessageSquare className="mr-2 h-8 w-8 text-purple-600" />
-          <h3 className="text-lg font-semibold text-purple-900">
-            🌪️ Join the Chaos Conversation!
+          <MessageSquare className="mr-2 h-8 w-8 text-gray-600" />
+          <h3 className="text-lg font-semibold text-gray-900">
+            Participe da Discussão!
           </h3>
         </div>
-        <p className="mb-4 text-purple-700">
-          You must enter the chaos or join Discordia to reply to this thread.
+        <p className="mb-4 text-gray-700">
+          Você precisa fazer login ou se registrar para responder a este tópico.
         </p>
         <div className="flex items-center justify-center space-x-3">
           <Button
             variant="outline"
-            className="border-purple-300 text-purple-600 hover:bg-purple-50"
+            className="border-gray-300 text-gray-700 hover:bg-gray-100"
           >
-            🌪️ Enter Chaos
+            Entrar
           </Button>
-          <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600">
-            🌪️ Join Chaos
+          <Button className="bg-blue-600 text-white hover:bg-blue-700">
+            Registrar
           </Button>
         </div>
       </Card>
@@ -196,11 +196,11 @@ export function ReplyForm({
     }, 0);
   };
   return (
-    <Card className="w-full border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
+    <Card className="w-full border border-gray-200 bg-white">
       <CardHeader className="pb-4">
         <div className="flex items-center gap-3">
-          <CardTitle className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-lg font-bold text-transparent">
-            🌪️ Create Chaos Post
+          <CardTitle className="text-lg font-bold text-gray-900">
+            Criar Resposta
           </CardTitle>
         </div>
       </CardHeader>
@@ -209,18 +209,18 @@ export function ReplyForm({
           <div className="mb-2 flex items-center justify-between">
             <label
               htmlFor="post-content"
-              className="text-sm font-medium text-purple-700"
+              className="text-sm font-medium text-gray-700"
             >
-              🌪️ Chaos Content
+              Conteúdo
             </label>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowHelp(!showHelp)}
-              className="gap-1 text-xs text-purple-600 hover:text-purple-800"
+              className="gap-1 text-xs text-gray-600 hover:text-gray-800"
             >
               <HelpCircle className="h-3 w-3" />
-              📜 Erisian BBCode
+              BBCode
             </Button>
           </div>
 
@@ -260,10 +260,10 @@ export function ReplyForm({
 
           <Textarea
             id="post-content"
-            placeholder="🌪️ Escreva seu caos aqui... Use [img]URL[/img] para imagens sagradas, [youtube]ID[/youtube] para vídeos Erisianos, [twitter]URL[/twitter] para tweets do caos"
+            placeholder="Escreva sua resposta aqui... Use [img]URL[/img] para imagens, [youtube]ID[/youtube] para vídeos do YouTube, [twitter]URL[/twitter] para tweets"
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="min-h-[150px] resize-none border-purple-200 font-mono text-sm focus:border-purple-400"
+            className="min-h-[150px] resize-none border-gray-200 font-mono text-sm focus:border-gray-400"
           />
         </div>
         <div className="flex flex-wrap gap-2">
@@ -271,35 +271,35 @@ export function ReplyForm({
             variant="outline"
             size="sm"
             onClick={() => insertBBCode("img", "URL_DA_IMAGEM")}
-            className="border-purple-300 text-xs text-purple-600 hover:bg-purple-50"
+            className="border-gray-300 text-xs text-gray-700 hover:bg-gray-50"
           >
-            🖼️ + Sacred Image
+            🖼️ + Imagem
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => insertBBCode("youtube", "ID_OU_URL_YOUTUBE")}
-            className="border-purple-300 text-xs text-purple-600 hover:bg-purple-50"
+            className="border-gray-300 text-xs text-gray-700 hover:bg-gray-50"
           >
-            📺 + Erisian Video
+            📺 + Vídeo
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => insertBBCode("twitter", "URL_DO_TWEET")}
-            className="border-purple-300 text-xs text-purple-600 hover:bg-purple-50"
+            className="border-gray-300 text-xs text-gray-700 hover:bg-gray-50"
           >
-            🐦 + Chaos Tweet
+            🐦 + Tweet
           </Button>
         </div>
         <div className="flex justify-end">
           <Button
             onClick={handleSubmit}
             disabled={!hasContent || isSubmitting}
-            className="gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600"
+            className="gap-2 bg-blue-600 text-white hover:bg-blue-700"
           >
             <Send className="h-4 w-4" />
-            {isSubmitting ? "🌪️ Spreading Chaos..." : "🌪️ Spread Chaos"}
+            {isSubmitting ? "Enviando..." : "Enviar Resposta"}
           </Button>
         </div>
       </CardContent>

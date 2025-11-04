@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  Apple,
   BookOpen,
+  Crown,
   Flame,
   Gamepad2,
   Home,
@@ -9,11 +11,10 @@ import {
   MessageSquareText,
   Newspaper,
   Settings,
-  Ticket,
-  Apple,
-  Zap,
-  Crown,
   Sparkles,
+  Ticket,
+  TvIcon,
+  Zap,
 } from "lucide-react";
 
 import {
@@ -33,15 +34,16 @@ import {
 } from "@/components/ui/sidebar";
 
 const mainNav = [
-  { title: "🌪️ Chaos Forums", icon: Home, url: "#" },
-  { title: "🍎 Gaming Chaos", icon: Gamepad2, url: "/forums/jogos-em-geral" },
+  { title: "Início", icon: Home, url: "/" },
+  { title: "Fóruns", icon: TvIcon, url: "/forums" },
+  { title: "Gaming", icon: Gamepad2, url: "/forums/jogos-em-geral" },
   {
-    title: "⚡ Vale Tudo Chaos",
+    title: "Vale Tudo",
     icon: MessageSquareText,
     url: "/forums/vale-tudo",
   },
-  { title: "🔥 Trending Chaos", icon: Flame, url: "#" },
-  { title: "📰 Latest Erisian News", icon: Newspaper, url: "#" },
+  { title: "Em Alta", icon: Flame, url: "#" },
+  { title: "Notícias", icon: Newspaper, url: "#" },
 ];
 
 export function ForumSidebar(props: React.ComponentProps<typeof Sidebar>) {
@@ -72,15 +74,15 @@ export function ForumSidebar(props: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton asChild>
               <a href="#">
                 <Sparkles />
-                <span>🌈 Chaos/Dark Mode</span>
+                <span>Modo Escuro</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <a href="#">
-                <Apple />
-                <span>🍎 Hide Sacred Images</span>
+                <Settings />
+                <span>Configurações</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

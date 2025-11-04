@@ -45,3 +45,15 @@ export async function POST(req: Request) {
 
   return new Response(JSON.stringify(thread));
 }
+
+export async function GET(req: Request) {
+  
+
+  const threads = await db.query.threadTable.findMany()
+
+  if (!threads) {
+    return new Response(JSON.stringify({ error: "Threads not found" }), { status: 404 })
+  }
+
+  return new Response(JSON.stringify(threads))
+}

@@ -26,27 +26,27 @@ import {
 // Dados do menu
 const menuItems = [
   {
-    title: "Forums",
+    title: "Fóruns",
     url: "/forums",
     icon: Home,
   },
   {
-    title: "⚡ Vale Tudo Chaos",
+    title: "Vale Tudo",
     url: "/forums/vale-tudo",
     icon: MessageSquareIcon,
   },
   {
-    title: "🍎 Gaming Chaos",
+    title: "Gaming",
     url: "/forums/jogos-em-geral",
     icon: GamepadIcon,
   },
   {
-    title: "📰 Latest Erisian Topics",
+    title: "Últimos Tópicos",
     url: "/ultimos-topicos",
     icon: FileText,
   },
   {
-    title: "🔥 Trending Chaos",
+    title: "Em Alta",
     url: "/em-alta",
     icon: LineChartIcon,
   },
@@ -64,9 +64,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Apple className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Forums</span>
-                  <span className="truncate text-xs text-purple-600">
-                    Principia Discordia
+                  <span className="truncate font-semibold">VT Forums</span>
+                  <span className="truncate text-xs text-gray-500">
+                    Fórum de Discussão
                   </span>
                 </div>
               </a>
@@ -100,7 +100,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton>
               <Crown />
-              <span>👑 Erisian User</span>
+              <span>Usuário</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

@@ -41,9 +41,9 @@ export function SiteHeader() {
           <div className="relative w-full">
             <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-purple-500" />
             <Input
-              placeholder="Search..."
+              placeholder="Pesquisar..."
               className="w-full border-purple-200 pl-9 focus:border-purple-400"
-              aria-label="Search"
+              aria-label="Pesquisar"
             />
           </div>
         </div>

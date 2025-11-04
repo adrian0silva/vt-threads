@@ -73,9 +73,9 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
 
   const initialPost = {
     id: `thread-${thread.id}`,
-    author: thread.userName || "Anonymous Erisian",
-    title: "Discordian",
-    joinDate: "Unknown",
+    author: thread.userName || "Erisiano Anônimo",
+    title: "Discordiano",
+    joinDate: "Desconhecido",
     posts: "0",
     likes: "0",
     content: thread.description || "",
@@ -88,9 +88,9 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
     initialPost,
     ...posts.map((post) => ({
       id: post.id,
-      author: post.userName || "Anonymous Erisian",
-      title: "Discordian",
-      joinDate: "Unknown",
+      author: post.userName || "Erisiano Anônimo",
+      title: "Discordiano",
+      joinDate: "Desconhecido",
       posts: "0",
       likes: "0",
       content: post.content,
@@ -188,11 +188,11 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
 
   // Discordian quotes for random display
   const erisianQuotes = [
-    "We Discordians must stick apart!",
-    "Nothing is true, everything is permitted",
-    "All Hail Eris! All Hail Discordia!",
-    "Chaos is the natural order of things",
-    "Confusion is the beginning of wisdom",
+    "Nós Discordianos devemos nos manter separados!",
+    "Nada é verdade, tudo é permitido",
+    "Toda Glória a Eris! Toda Glória a Discordia!",
+    "O caos é a ordem natural das coisas",
+    "A confusão é o início da sabedoria",
   ];
 
   const randomQuote =
@@ -206,7 +206,7 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
           <div className="mb-4 flex items-center justify-center gap-2">
             <Sparkles className="h-6 w-6 animate-pulse text-yellow-500" />
             <h1 className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 bg-clip-text text-3xl font-bold text-transparent">
-              🌪️ Chaos Thread 🌪️
+              🌪️ Tópico de Caos 🌪️
             </h1>
             <Sparkles className="h-6 w-6 animate-pulse text-yellow-500" />
           </div>
@@ -219,17 +219,17 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
         <nav className="mb-6 flex items-center space-x-2 rounded-lg bg-white/50 p-3 text-sm text-gray-600 shadow-sm">
           <a href="#" className="flex items-center gap-1 hover:text-purple-600">
             <Apple className="h-4 w-4" />
-            Forums
+            Fóruns
           </a>
           <ChevronRight className="h-4 w-4" />
           <a href="#" className="flex items-center gap-1 hover:text-purple-600">
             <Crown className="h-4 w-4" />
-            Discordian Society
+            Sociedade Discordiana
           </a>
           <ChevronRight className="h-4 w-4" />
           <a href="#" className="flex items-center gap-1 hover:text-purple-600">
             <Zap className="h-4 w-4" />
-            Vale Tudo Chaos
+            Vale Tudo Caos
           </a>
         </nav>
 
@@ -243,20 +243,22 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
             <div className="flex items-center space-x-2">
               <div className="flex items-center space-x-1">
                 <User className="h-4 w-4" />
-                <span className="hidden md:inline">Erisian Creator</span>
+                <span className="hidden md:inline">Criador Erisiano</span>
                 <a href="#" className="truncate font-medium hover:underline">
-                  {thread.userName || "Anonymous Erisian"}
+                  {thread.userName || "Erisiano Anônimo"}
                 </a>
               </div>
             </div>
             <div className="flex items-center space-x-1">
               <Clock className="h-4 w-4" />
-              <span className="hidden md:inline">Chaos Began</span>
-              <span>38 minutes ago</span>
+              <span className="hidden md:inline">Caos Iniciado</span>
+              <span>há 38 minutos</span>
             </div>
             <div className="flex items-center space-x-1">
               <Zap className="h-4 w-4" />
-              <span>Chaos Level: {Math.floor(Math.random() * 10) + 1}/10</span>
+              <span>
+                Nível de Caos: {Math.floor(Math.random() * 10) + 1}/10
+              </span>
             </div>
           </div>
         </div>
@@ -322,7 +324,7 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
                         variant="outline"
                         className="border-orange-300 text-xs text-orange-600"
                       >
-                        ⚡ Erisian Message
+                        ⚡ Mensagem Erisiana
                       </Badge>
                     </div>
                   </div>
@@ -384,7 +386,7 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
                         variant="outline"
                         className="border-orange-300 text-xs text-orange-600"
                       >
-                        ⚡ Erisian Message
+                        ⚡ Mensagem Erisiana
                       </Badge>
                     </div>
                     {renderBBCodeContent(post.content)}

@@ -1,20 +1,10 @@
 import { eq, sql } from "drizzle-orm";
-import {
-  Apple,
-  Clock,
-  Crown,
-  Eye,
-  MessageSquare,
-  PlusIcon,
-  Sparkles,
-  Zap,
-} from "lucide-react";
+import { Clock, Eye, MessageSquare, PlusIcon, User } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { db } from "@/db";
@@ -65,37 +55,18 @@ const ForumDetailsPage = async ({ params }: ForumPageProps) => {
       userTable.image, // precisa entrar no groupBy também
     );
 
-  // Discordian quotes for random display
-  const erisianQuotes = [
-    "We Discordians must stick apart!",
-    "Nothing is true, everything is permitted",
-    "All Hail Eris! All Hail Discordia!",
-    "Chaos is the natural order of things",
-    "Confusion is the beginning of wisdom",
-  ];
-
-  const randomQuote =
-    erisianQuotes[Math.floor(Math.random() * erisianQuotes.length)];
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
+    <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-7xl space-y-6 p-6">
-        {/* Discordian Header */}
+        {/* Header */}
         <div className="mb-6 text-center sm:mb-8">
-          <div className="mb-3 flex items-center justify-center gap-2 sm:mb-4">
-            <Sparkles className="h-5 w-5 animate-pulse text-yellow-500 sm:h-6 sm:w-6" />
-            <h1 className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
-              🌪️ VT Forums 🌪️
-            </h1>
-            <Sparkles className="h-5 w-5 animate-pulse text-yellow-500 sm:h-6 sm:w-6" />
-          </div>
-          <p className="text-xs text-gray-600 italic sm:text-sm">
-            &quot;{randomQuote}&quot; - Principia Discordia
-          </p>
+          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
+            VT Forums
+          </h1>
         </div>
 
-        {/* Forum Header with Discordian Flair */}
-        <div className="rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 p-4 text-white shadow-lg sm:p-6">
+        {/* Forum Header */}
+        <div className="rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white shadow-lg sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="mb-2 text-2xl font-bold sm:text-3xl">
@@ -107,19 +78,13 @@ const ForumDetailsPage = async ({ params }: ForumPageProps) => {
               <div className="mt-3 flex flex-col gap-2 text-xs sm:flex-row sm:items-center sm:gap-4 sm:text-sm">
                 <div className="flex items-center gap-1">
                   <Eye className="h-4 w-4" />
-                  <span>{threads.length} Chaos Threads</span>
+                  <span>{threads.length} Tópicos</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <MessageSquare className="h-4 w-4" />
                   <span>
-                    {threads.reduce((sum, t) => sum + t.postsCount, 0)} Erisian
-                    Messages
-                  </span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Zap className="h-4 w-4" />
-                  <span>
-                    Chaos Level: {Math.floor(Math.random() * 10) + 1}/10
+                    {threads.reduce((sum, t) => sum + t.postsCount, 0)}{" "}
+                    Mensagens
                   </span>
                 </div>
               </div>
@@ -131,27 +96,27 @@ const ForumDetailsPage = async ({ params }: ForumPageProps) => {
                   size="lg"
                 >
                   <PlusIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                  <span className="text-sm sm:text-base">🌪️ Create Chaos</span>
+                  <span className="text-sm sm:text-base">Criar Tópico</span>
                 </Button>
               </Link>
             )}
           </div>
         </div>
 
-        {/* Threads List with Discordian Styling */}
+        {/* Threads List */}
         {threads.length === 0 ? (
-          <div className="rounded-lg border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 py-12 text-center">
+          <div className="rounded-lg border border-gray-200 bg-gray-50 py-12 text-center">
             <div className="mb-4">
-              <Apple className="mx-auto h-16 w-16 text-purple-400" />
+              <MessageSquare className="mx-auto h-16 w-16 text-gray-400" />
             </div>
-            <h3 className="mb-2 text-xl font-bold text-purple-600">
-              🌪️ No Chaos Yet! 🌪️
+            <h3 className="mb-2 text-xl font-bold text-gray-700">
+              Ainda não há tópicos
             </h3>
-            <p className="mb-4 text-purple-500">
-              This Discordian forum awaits its first thread of chaos!
+            <p className="mb-4 text-gray-600">
+              Este fórum aguarda seu primeiro tópico de discussão!
             </p>
-            <p className="text-sm text-purple-400 italic">
-              &quot;Be the first to spread Erisian wisdom!&quot;
+            <p className="text-sm text-gray-500">
+              Seja o primeiro a iniciar uma discussão.
             </p>
           </div>
         ) : (
@@ -159,26 +124,26 @@ const ForumDetailsPage = async ({ params }: ForumPageProps) => {
             {threads.map((thread) => (
               <Card
                 key={thread.id}
-                className="border-2 bg-gradient-to-r from-white to-purple-50 transition-all duration-300 hover:scale-[1.02] hover:border-purple-300 hover:shadow-lg"
+                className="border border-gray-200 bg-white transition-all duration-300 hover:border-gray-300 hover:shadow-md"
               >
                 <div className="p-4 sm:p-6">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-                    {/* Avatar do autor com estilo Discordiano */}
+                    {/* Avatar do autor */}
                     <div className="flex items-center gap-3 sm:flex-col sm:items-center">
-                      <Avatar className="h-10 w-10 flex-shrink-0 border-2 border-purple-300 sm:h-12 sm:w-12">
+                      <Avatar className="h-10 w-10 flex-shrink-0 border border-gray-200 sm:h-12 sm:w-12">
                         <AvatarImage
                           src={thread.userAvatar || "/placeholder.svg"}
-                          alt={thread.userName || "Erisian User"}
+                          alt={thread.userName || "Usuário"}
                         />
-                        <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+                        <AvatarFallback className="bg-gray-100 text-gray-600">
                           {thread.title.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="sm:hidden">
                         <div className="flex items-center gap-1 text-xs text-gray-500">
-                          <Crown className="h-3 w-3" />
-                          <span className="font-medium text-purple-600">
-                            {thread.userName || "Anonymous Erisian"}
+                          <User className="h-3 w-3" />
+                          <span className="font-medium text-gray-700">
+                            {thread.userName || "Usuário Anônimo"}
                           </span>
                         </div>
                       </div>
@@ -188,7 +153,7 @@ const ForumDetailsPage = async ({ params }: ForumPageProps) => {
                     <div className="min-w-0 flex-1">
                       <div className="mb-2">
                         <Link href={`/threads/${thread.slug}`}>
-                          <h3 className="mb-1 line-clamp-2 text-base font-bold text-purple-800 transition-colors hover:text-purple-600 hover:underline sm:text-lg">
+                          <h3 className="mb-1 line-clamp-2 text-base font-bold text-gray-900 transition-colors hover:text-blue-600 hover:underline sm:text-lg">
                             {thread.title}
                           </h3>
                         </Link>
@@ -198,9 +163,9 @@ const ForumDetailsPage = async ({ params }: ForumPageProps) => {
                       </div>
                       <div className="flex flex-col gap-2 text-xs text-gray-500 sm:flex-row sm:items-center sm:gap-3">
                         <div className="hidden items-center gap-1 sm:flex">
-                          <Crown className="h-3 w-3" />
-                          <span className="font-medium text-purple-600">
-                            {thread.userName || "Anonymous Erisian"}
+                          <User className="h-3 w-3" />
+                          <span className="font-medium text-gray-700">
+                            {thread.userName || "Usuário Anônimo"}
                           </span>
                         </div>
                         <div className="flex items-center gap-1">
@@ -209,27 +174,18 @@ const ForumDetailsPage = async ({ params }: ForumPageProps) => {
                             {new Date(thread.createdAt).toLocaleDateString()}
                           </span>
                         </div>
-                        <Badge
-                          variant="outline"
-                          className="border-orange-300 text-xs text-orange-600"
-                        >
-                          ⚡ Chaos Level: {Math.floor(Math.random() * 10) + 1}
-                          /10
-                        </Badge>
                       </div>
                     </div>
 
-                    {/* Estatísticas Discordianas */}
+                    {/* Estatísticas */}
                     <div className="flex items-center justify-between gap-4 text-sm sm:flex-col sm:gap-6">
                       <div className="text-center">
                         <div className="mb-1 flex items-center gap-1 text-gray-500">
                           <MessageSquare className="h-4 w-4" />
-                          <span className="hidden sm:inline">
-                            Erisian Replies:
-                          </span>
-                          <span className="sm:hidden">Replies:</span>
+                          <span className="hidden sm:inline">Respostas:</span>
+                          <span className="sm:hidden">Resp:</span>
                         </div>
-                        <div className="text-lg font-bold text-purple-700">
+                        <div className="text-lg font-bold text-gray-700">
                           {thread.postsCount}
                         </div>
                       </div>
@@ -237,11 +193,11 @@ const ForumDetailsPage = async ({ params }: ForumPageProps) => {
                         <div className="mb-1 flex items-center gap-1 text-gray-500">
                           <Eye className="h-4 w-4" />
                           <span className="hidden sm:inline">
-                            Chaos Observers:
+                            Visualizações:
                           </span>
                           <span className="sm:hidden">Views:</span>
                         </div>
-                        <div className="text-lg font-bold text-purple-700">
+                        <div className="text-lg font-bold text-gray-700">
                           {thread.views}
                         </div>
                       </div>
@@ -253,22 +209,12 @@ const ForumDetailsPage = async ({ params }: ForumPageProps) => {
           </div>
         )}
 
-        {/* Discordian Footer */}
+        {/* Footer */}
         <div className="mt-8 text-center">
-          <div className="rounded-lg border-2 border-purple-200 bg-gradient-to-r from-purple-100 to-pink-100 p-4">
-            <h3 className="mb-2 text-sm font-bold text-purple-800">
-              🌟 All Hail Eris! All Hail Discordia! 🌟
-            </h3>
-            <p className="text-xs text-purple-600">
-              &quot;We Discordians must stick apart!&quot; - Malaclypse the
-              Younger
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <p className="text-xs text-gray-600">
+              VT Forums - Fórum de Discussão
             </p>
-            <div className="mt-3 flex justify-center gap-4 text-xs text-purple-500">
-              <span>🍎 Golden Apple</span>
-              <span>⚡ Sacred Chao</span>
-              <span>🌪️ Erisian Chaos</span>
-              <span>🌈 Discordian Rainbow</span>
-            </div>
           </div>
         </div>
       </div>

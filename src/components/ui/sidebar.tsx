@@ -276,7 +276,7 @@ function SidebarTrigger({
     >
       <Image
         src="/eris-apple.png" // substitua pelo seu logo
-        alt="Maçã de Éris"
+        alt="Logo"
         width={32} // ajuste o tamanho conforme necessário
         height={32}
         className="rounded-full"

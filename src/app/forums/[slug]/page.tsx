@@ -157,9 +157,6 @@ const ForumDetailsPage = async ({ params }: ForumPageProps) => {
                             {thread.title}
                           </h3>
                         </Link>
-                        <p className="mb-2 line-clamp-2 text-sm text-gray-600">
-                          {thread.description}
-                        </p>
                       </div>
                       <div className="flex flex-col gap-2 text-xs text-gray-500 sm:flex-row sm:items-center sm:gap-3">
                         <div className="hidden items-center gap-1 sm:flex">
@@ -178,28 +175,25 @@ const ForumDetailsPage = async ({ params }: ForumPageProps) => {
                     </div>
 
                     {/* Estatísticas */}
-                    <div className="flex items-center justify-between gap-4 text-sm sm:flex-col sm:gap-6">
-                      <div className="text-center">
-                        <div className="mb-1 flex items-center gap-1 text-gray-500">
-                          <MessageSquare className="h-4 w-4" />
-                          <span className="hidden sm:inline">Respostas:</span>
-                          <span className="sm:hidden">Resp:</span>
-                        </div>
-                        <div className="text-lg font-bold text-gray-700">
+                    <div className="flex items-center gap-3 text-sm">
+                      {/* Respostas */}
+                      <div className="flex items-center gap-1 text-gray-500">
+                        <MessageSquare className="h-4 w-4" />
+                        <span className="hidden sm:inline">Respostas:</span>
+                        <span className="sm:hidden">Resp:</span>
+                        <span className="text-lg font-bold text-gray-700">
                           {thread.postsCount}
-                        </div>
+                        </span>
                       </div>
-                      <div className="text-center">
-                        <div className="mb-1 flex items-center gap-1 text-gray-500">
-                          <Eye className="h-4 w-4" />
-                          <span className="hidden sm:inline">
-                            Visualizações:
-                          </span>
-                          <span className="sm:hidden">Views:</span>
-                        </div>
-                        <div className="text-lg font-bold text-gray-700">
+
+                      {/* Visualizações */}
+                      <div className="flex items-center gap-1 text-gray-500">
+                        <Eye className="h-4 w-4" />
+                        <span className="hidden sm:inline">Visualizações:</span>
+                        <span className="sm:hidden">Views:</span>
+                        <span className="text-lg font-bold text-gray-700">
                           {thread.views}
-                        </div>
+                        </span>
                       </div>
                     </div>
                   </div>

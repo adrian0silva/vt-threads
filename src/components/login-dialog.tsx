@@ -97,18 +97,18 @@ export function LoginDialog() {
       <DialogTrigger asChild>
         <Button
           variant="ghost"
-          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600"
+          className="bg-blue-600 text-white hover:bg-blue-700"
         >
-          🌪️ Enter Chaos
+          Entrar
         </Button>
       </DialogTrigger>
-      <DialogContent className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 sm:max-w-md">
+      <DialogContent className="border border-gray-200 bg-white sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-2xl font-bold text-transparent">
-            🌪️ Enter the Chaos
+          <DialogTitle className="text-2xl font-bold text-gray-900">
+            Entrar
           </DialogTitle>
-          <DialogDescription className="text-purple-600">
-            Digite suas credenciais Erisianas para acessar o caos.
+          <DialogDescription className="text-gray-600">
+            Digite suas credenciais para acessar sua conta.
           </DialogDescription>
         </DialogHeader>
 
@@ -159,13 +159,13 @@ export function LoginDialog() {
 
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600"
+              className="w-full bg-blue-600 text-white hover:bg-blue-700"
             >
-              🌪️ Enter Chaos
+              Entrar
             </Button>
             <Button
               variant="outline"
-              className="w-full border-purple-300 text-purple-600 hover:bg-purple-50"
+              className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
               onClick={handleSignInWithGoogle}
               type="button"
             >
@@ -187,7 +187,7 @@ export function LoginDialog() {
                   fill="#EA4335"
                 />
               </svg>
-              🍎 Enter with Google Chaos
+              Entrar com Google
             </Button>
             {/* <Button onSubmit={form.handleSubmit(onSubmit)} type="submit" className="w-full" disabled={loading}>
             {loading ? "Entrando..." : "Entrar"}

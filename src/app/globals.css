@@ -44,13 +44,13 @@
 }
 
 :root {
-  --background: oklch(0.98 0.02 95);     /* Amarelo maçã dourada */
-  --foreground: oklch(0.15 0.02 290);    /* Preto/roxo escuro */
+  --background: oklch(0.98 0.02 95);     /* Fundo claro */
+  --foreground: oklch(0.15 0.02 290);    /* Texto escuro */
 
-  --primary: oklch(0.65 0.25 30);        /* Vermelho caótico */
-  --primary-foreground: oklch(0.98 0.01 95); /* Amarelo claro */
+  --primary: oklch(0.65 0.25 30);        /* Vermelho primário */
+  --primary-foreground: oklch(0.98 0.01 95); /* Texto claro */
 
-  --secondary: oklch(0.7 0.2 310);       /* Roxo discordiano */
+  --secondary: oklch(0.7 0.2 310);       /* Roxo secundário */
   --secondary-foreground: oklch(0.99 0.01 95);
 
   --accent: oklch(0.8 0.25 150);         /* Verde ácido */

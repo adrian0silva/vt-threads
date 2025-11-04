@@ -153,11 +153,11 @@ export default async function Home() {
                         <div className="mb-1 flex items-center gap-1 text-gray-500">
                           <Eye className="h-4 w-4" />
                           <span className="hidden sm:inline">
-                            Chaos Observers:
+                            Visualizações:
                           </span>
                           <span className="sm:hidden">Views:</span>
                         </div>
-                        <div className="text-lg font-bold text-purple-700">
+                        <div className="text-lg font-bold text-gray-700">
                           {thread.views}
                         </div>
                       </div> */}

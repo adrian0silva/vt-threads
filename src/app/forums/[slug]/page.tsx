@@ -85,7 +85,7 @@ const ForumDetailsPage = async ({ params }: ForumPageProps) => {
           <div className="mb-3 flex items-center justify-center gap-2 sm:mb-4">
             <Sparkles className="h-5 w-5 animate-pulse text-yellow-500 sm:h-6 sm:w-6" />
             <h1 className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
-              🌪️ Chaos Forum 🌪️
+              🌪️ VT Forums 🌪️
             </h1>
             <Sparkles className="h-5 w-5 animate-pulse text-yellow-500 sm:h-6 sm:w-6" />
           </div>

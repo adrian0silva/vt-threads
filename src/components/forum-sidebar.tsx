@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  Apple,
   BookOpen,
+  Crown,
   Flame,
   Gamepad2,
   Home,
@@ -9,11 +11,10 @@ import {
   MessageSquareText,
   Newspaper,
   Settings,
-  Ticket,
-  Apple,
-  Zap,
-  Crown,
   Sparkles,
+  Ticket,
+  TvIcon,
+  Zap,
 } from "lucide-react";
 
 import {
@@ -33,7 +34,8 @@ import {
 } from "@/components/ui/sidebar";
 
 const mainNav = [
-  { title: "🌪️ Chaos Forums", icon: Home, url: "#" },
+  { title: "🌪️ Home", icon: Home, url: "/" },
+  { title: "🌪️ Forums", icon: TvIcon, url: "/forums" },
   { title: "🍎 Gaming Chaos", icon: Gamepad2, url: "/forums/jogos-em-geral" },
   {
     title: "⚡ Vale Tudo Chaos",

@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+import { ThemeSwitcher } from "./theme-switcher";
 import { SidebarTrigger } from "./ui/sidebar";
 
 export function SiteHeader() {
@@ -22,8 +23,8 @@ export function SiteHeader() {
 
   return (
     <header className="bg-background/80 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-30 border-b backdrop-blur">
-      <SidebarTrigger className="-ml-1" />
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-2 px-4">
+        <SidebarTrigger className="-ml-1" />
         {/* Logo */}
         <div className="flex flex-none items-center gap-2">
           <Link href="/" className="flex-none">
@@ -51,6 +52,7 @@ export function SiteHeader() {
           className="ml-auto flex items-center gap-1"
           suppressHydrationWarning
         >
+          <ThemeSwitcher />
           {mounted ? (
             <>
               {session?.user ? (

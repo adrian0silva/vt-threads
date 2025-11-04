@@ -26,8 +26,8 @@ import {
 // Dados do menu
 const menuItems = [
   {
-    title: "🌪️ Chaos Forums",
-    url: "/",
+    title: "Forums",
+    url: "/forums",
     icon: Home,
   },
   {
@@ -64,7 +64,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Apple className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">🌪️ Chaos Forum</span>
+                  <span className="truncate font-semibold">Forums</span>
                   <span className="truncate text-xs text-purple-600">
                     Principia Discordia
                   </span>

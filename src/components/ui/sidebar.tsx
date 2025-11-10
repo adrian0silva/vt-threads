@@ -274,13 +274,7 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      <Image
-        src="/eris-apple.png" // substitua pelo seu logo
-        alt="Logo"
-        width={32} // ajuste o tamanho conforme necessário
-        height={32}
-        className="rounded-full"
-      />
+    <PanelLeftIcon className="size-4" />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   );

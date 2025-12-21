@@ -1,6 +1,6 @@
 "use server";
 import { eq, sql } from "drizzle-orm";
-import { Clock, MessageSquare, User } from "lucide-react";
+import { Clock, MessageSquare, PlusIcon, User } from "lucide-react";
 import Link from "next/link";
 
 import { RightRail } from "@/components/right-rail";
@@ -8,8 +8,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { db } from "@/db";
 import { postTable, threadTable, userTable } from "@/db/schema";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { Button } from "@/components/ui/button";
+import { CreateThread } from "@/components/create-thread";
 
 export default async function Home() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  const forums = await db.query.forumTable.findMany({});
   // Busca todos os fóruns do banco
   const threads = await db
     .select({
@@ -61,6 +69,7 @@ export default async function Home() {
             Participe de discussões sobre diversos temas. Mantenha o respeito e
             contribua com conteúdo de qualidade.
           </p>
+          {session?.user && <CreateThread forums={forums} />}
         </div>
 
         <div className="flex flex-col gap-8 lg:flex-row">

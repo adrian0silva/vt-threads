@@ -1,7 +1,6 @@
 import { eq } from "drizzle-orm";
 import { ChevronRight, Clock, Eye, MessageSquare, User } from "lucide-react";
 import { headers } from "next/headers";
-import Image from "next/image";
 
 import { ReplyForm } from "@/components/reply-form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,6 +16,370 @@ interface ThreadPageProps {
   params: Promise<{ slug: string }>;
 }
 
+interface Post {
+  id: string;
+  author: string;
+  title: string;
+  joinDate: string;
+  posts: string;
+  likes: string;
+  content: string;
+  timestamp: string;
+  isOriginalPoster: boolean;
+  userAvatar: string | null;
+  signature?: string | null;
+}
+
+interface BBCodeElement {
+  type: string;
+  content: string;
+  data?: {
+    url?: string;
+    id?: string;
+  };
+}
+
+// Componente para renderizar conteúdo BBCode
+function BBCodeContent({ content }: { content: string }) {
+  const elements = parseBBCode(content) as BBCodeElement[];
+
+  const renderElement = (element: BBCodeElement, index: number) => {
+    switch (element.type) {
+      case "text":
+        return (
+          <div
+            key={index}
+            className="prose prose-sm dark:prose-invert max-w-none"
+          >
+            <p className="text-foreground whitespace-pre-wrap">
+              {element.content}
+            </p>
+          </div>
+        );
+
+      case "image":
+        return (
+          <div
+            key={index}
+            className="overflow-hidden rounded-lg border border-gray-200 shadow-md"
+          >
+            <img
+              src={element.data?.url || "/placeholder.svg"}
+              alt={`Imagem ${index + 1}`}
+              className="h-auto w-full object-contain"
+            />
+          </div>
+        );
+
+      case "youtube":
+        return (
+          <div
+            key={index}
+            className="aspect-video overflow-hidden rounded-lg border border-gray-200 shadow-md"
+          >
+            <iframe
+              src={`https://www.youtube.com/embed/${element.data?.id}`}
+              title={`Vídeo ${index + 1}`}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="h-full w-full"
+            />
+          </div>
+        );
+
+      case "twitter":
+        return (
+          <div
+            key={index}
+            className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-md"
+          >
+            <div className="mb-2 flex items-center gap-2">
+              <div className="flex h-4 w-4 items-center justify-center rounded-sm bg-blue-500">
+                <span className="text-xs font-bold text-white">𝕏</span>
+              </div>
+              <span className="text-muted-foreground text-sm">
+                Tweet incorporado
+              </span>
+            </div>
+            <a
+              href={
+                element.content.startsWith("http")
+                  ? element.content
+                  : `https://twitter.com/i/status/${element.data?.id}`
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-blue-600 hover:underline"
+            >
+              Ver tweet original →
+            </a>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return <div className="space-y-4">{elements.map(renderElement)}</div>;
+}
+
+// Componente para User Info Sidebar (Desktop)
+function UserSidebar({ post }: { post: Post }) {
+  return (
+    <div className="w-48 border-r bg-gray-50 p-4">
+      <div className="text-center">
+        <Avatar className="border-black-200 mx-auto mb-2 h-36 w-36 rounded-none border">
+          <AvatarImage
+            src={
+              post.userAvatar ||
+              `/placeholder.svg?height=64&width=64&query=${post.author}`
+            }
+          />
+          <AvatarFallback className="bg-gray-100 text-gray-600">
+            {post.author.slice(0, 2).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+        <h3 className="cursor-pointer font-semibold text-gray-900 hover:text-blue-600 hover:underline">
+          {post.author}
+        </h3>
+        <Badge
+          variant="secondary"
+          className="mb-2 bg-gray-100 text-xs text-gray-700"
+        >
+          {post.title}
+        </Badge>
+        {post.isOriginalPoster && (
+          <Badge variant="default" className="mb-2 bg-blue-600 text-xs">
+            OP
+          </Badge>
+        )}
+      </div>
+      <div className="mt-3 space-y-1 text-xs text-gray-600">
+        <div>Membro desde: {post.joinDate}</div>
+        <div>Posts: {post.posts}</div>
+        <div>Likes: {post.likes}</div>
+      </div>
+    </div>
+  );
+}
+
+// Componente para Header Mobile
+function MobilePostHeader({ post }: { post: Post }) {
+  return (
+    <div className="border-b bg-gray-50 p-4">
+      <div className="flex items-center space-x-3">
+        <Avatar className="h-12 w-12 rounded-none border border-gray-200">
+          <AvatarImage
+            src={
+              post.userAvatar ||
+              `/placeholder.svg?height=48&width=48&query=${post.author}`
+            }
+          />
+          <AvatarFallback className="bg-gray-100 text-gray-600">
+            {post.author.slice(0, 2).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+
+        <div className="flex-1">
+          <div className="flex items-center space-x-2">
+            <h3 className="cursor-pointer font-semibold text-gray-900 hover:text-blue-600 hover:underline">
+              {post.author}
+            </h3>
+            <Badge
+              variant="secondary"
+              className="bg-gray-100 text-xs text-gray-700"
+            >
+              {post.title}
+            </Badge>
+            {post.isOriginalPoster && (
+              <Badge variant="default" className="bg-blue-600 text-xs">
+                OP
+              </Badge>
+            )}
+          </div>
+
+          <div className="mt-1 flex items-center space-x-3 text-xs text-gray-600">
+            <span>Posts: {post.posts}</span>
+            <span>Likes: {post.likes}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-3 flex items-center justify-between">
+        <span className="text-sm text-gray-600">{post.timestamp}</span>
+        <Badge
+          variant="outline"
+          className="border-gray-300 text-xs text-gray-600"
+        >
+          Mensagem
+        </Badge>
+      </div>
+    </div>
+  );
+}
+
+// Componente para ações do post
+function PostActions() {
+  return (
+    <div className="flex items-center justify-end gap-2">
+      <Button
+        variant="ghost"
+        size="sm"
+        className="flex items-center gap-1 text-gray-600"
+      >
+        👍 Like
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="flex items-center gap-1 text-gray-600"
+      >
+        💬 Reply
+      </Button>
+    </div>
+  );
+}
+
+// Componente para Post Card
+function PostCard({ post }: { post: Post }) {
+  return (
+    <Card className="overflow-hidden border border-gray-200 bg-white p-0 transition-all duration-300 hover:border-gray-300 hover:shadow-md">
+      {/* Layout Mobile */}
+      <div className="block md:hidden">
+        <MobilePostHeader post={post} />
+        <div className="bg-white p-4">
+          <BBCodeContent content={post.content} />
+        </div>
+        <div className="bg-white px-4 pb-4">
+          <PostActions />
+        </div>
+      </div>
+
+      {/* Layout Desktop */}
+      <div className="hidden md:flex">
+        <UserSidebar post={post} />
+        <div className="flex flex-1 flex-col bg-white">
+          <div className="p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-sm text-gray-600">{post.timestamp}</span>
+              <Badge
+                variant="outline"
+                className="border-gray-300 text-xs text-gray-600"
+              >
+                Mensagem
+              </Badge>
+            </div>
+            <BBCodeContent content={post.content} />
+            {post.signature && (
+              <div className="mt-4 border-t pt-3 text-xs text-gray-500 italic">
+                {post.signature}
+              </div>
+            )}
+          </div>
+          <div className="mt-auto bg-gray-50 px-4 py-3">
+            <PostActions />
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+// Componente para Breadcrumb
+function Breadcrumb() {
+  return (
+    <nav className="mb-6 flex items-center space-x-2 rounded-lg bg-white p-3 text-sm text-gray-600 shadow-sm">
+      <a href="#" className="flex items-center gap-1 hover:text-blue-600">
+        <MessageSquare className="h-4 w-4" />
+        Fóruns
+      </a>
+      <ChevronRight className="h-4 w-4" />
+      <a href="#" className="flex items-center gap-1 hover:text-blue-600">
+        <MessageSquare className="h-4 w-4" />
+        Categoria
+      </a>
+      <ChevronRight className="h-4 w-4" />
+      <a href="#" className="flex items-center gap-1 hover:text-blue-600">
+        <MessageSquare className="h-4 w-4" />
+        Fórum
+      </a>
+    </nav>
+  );
+}
+
+// Componente para Thread Header
+function ThreadHeader({
+  thread,
+}: {
+  thread: { title: string; userName: string | null; createdAt: Date };
+}) {
+  return (
+    <div className="mb-6 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white shadow-lg md:p-6">
+      <h1 className="mb-4 text-xl font-bold break-words md:text-3xl">
+        {thread.title}
+      </h1>
+      <div className="flex flex-col space-y-3 text-sm md:flex-row md:items-center md:space-y-0 md:space-x-6">
+        <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1">
+            <User className="h-4 w-4" />
+            <span className="hidden md:inline">Autor:</span>
+            <a href="#" className="truncate font-medium hover:underline">
+              {thread.userName || "Usuário Anônimo"}
+            </a>
+          </div>
+        </div>
+        <div className="flex items-center space-x-1">
+          <Clock className="h-4 w-4" />
+          <span className="hidden md:inline">Criado em:</span>
+          <span>{new Date(thread.createdAt).toLocaleDateString("pt-BR")}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Componente para Thread Stats
+function ThreadStats({
+  views,
+  repliesCount,
+}: {
+  views: number;
+  repliesCount: number;
+}) {
+  return (
+    <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
+      <div className="flex items-center justify-between text-sm">
+        <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-1 text-gray-700">
+            <Eye className="h-4 w-4" />
+            <span>{views} visualizações</span>
+          </div>
+          <div className="flex items-center space-x-1 text-gray-700">
+            <MessageSquare className="h-4 w-4" />
+            <span>{repliesCount} respostas</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Componente para Empty State
+function EmptyState() {
+  return (
+    <Card className="border border-gray-200 bg-gray-50 p-8 text-center">
+      <MessageSquare className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+      <h3 className="mb-2 text-lg font-semibold text-gray-700">
+        Ainda não há mensagens
+      </h3>
+      <p className="text-gray-600">
+        Seja o primeiro a responder a este tópico!
+      </p>
+    </Card>
+  );
+}
+
 export default async function ThreadPage({ params }: ThreadPageProps) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -24,7 +387,8 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
 
   const { slug } = await params;
 
-  const threadQuery = db
+  // Buscar thread
+  const [thread] = await db
     .select({
       id: threadTable.id,
       title: threadTable.title,
@@ -39,13 +403,13 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
     .from(threadTable)
     .leftJoin(userTable, eq(threadTable.userId, userTable.id))
     .where(eq(threadTable.slug, slug))
-    .limit(1);
-
-  const [thread] = await threadQuery.execute();
+    .limit(1)
+    .execute();
 
   if (!thread) throw new Error("Thread não encontrada");
 
-  const postsQuery = db
+  // Buscar posts
+  const posts = await db
     .select({
       id: postTable.id,
       content: postTable.content,
@@ -57,11 +421,11 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
     .from(postTable)
     .leftJoin(userTable, eq(postTable.userId, userTable.id))
     .where(eq(postTable.threadId, thread.id))
-    .orderBy(postTable.createdAt);
+    .orderBy(postTable.createdAt)
+    .execute();
 
-  const posts = await postsQuery.execute();
-
-  const initialPost = {
+  // Criar post inicial do thread
+  const initialPost: Post = {
     id: `thread-${thread.id}`,
     author: thread.userName || "Usuário Anônimo",
     title: "Membro",
@@ -72,9 +436,11 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
     timestamp: new Date(thread.createdAt).toLocaleString(),
     isOriginalPoster: true,
     userAvatar: thread.userAvatar,
+    signature: "",
   };
 
-  const displayPosts = [
+  // Mapear posts
+  const displayPosts: Post[] = [
     initialPost,
     ...posts.map((post) => ({
       id: post.id,
@@ -87,291 +453,30 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
       timestamp: new Date(post.createdAt).toLocaleString(),
       isOriginalPoster: post.userId === thread.userId,
       userAvatar: post.userAvatar,
+      signature: undefined,
     })),
   ];
-
-  const renderBBCodeContent = (content: string) => {
-    const elements = parseBBCode(content);
-
-    return (
-      <div className="space-y-4">
-        {elements.map((element, index) => {
-          switch (element.type) {
-            case "text":
-              return (
-                <div
-                  key={index}
-                  className="prose prose-sm dark:prose-invert max-w-none"
-                >
-                  <p className="text-foreground whitespace-pre-wrap">
-                    {element.content}
-                  </p>
-                </div>
-              );
-
-            case "image":
-              return (
-                <div
-                  key={index}
-                  className="overflow-hidden rounded-lg border border-gray-200 shadow-md"
-                >
-                  <Image
-                    src={element.data?.url || "/placeholder.svg"}
-                    alt={`Imagem ${index + 1}`}
-                    className="h-auto max-h-96 w-full object-cover"
-                  />
-                </div>
-              );
-
-            case "youtube":
-              return (
-                <div
-                  key={index}
-                  className="aspect-video overflow-hidden rounded-lg border border-gray-200 shadow-md"
-                >
-                  <iframe
-                    src={`https://www.youtube.com/embed/${element.data?.id}`}
-                    title={`Vídeo ${index + 1}`}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="h-full w-full"
-                  />
-                </div>
-              );
-
-            case "twitter":
-              return (
-                <div
-                  key={index}
-                  className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-md"
-                >
-                  <div className="mb-2 flex items-center gap-2">
-                    <div className="flex h-4 w-4 items-center justify-center rounded-sm bg-blue-500">
-                      <span className="text-xs font-bold text-white">𝕏</span>
-                    </div>
-                    <span className="text-muted-foreground text-sm">
-                      Tweet incorporado
-                    </span>
-                  </div>
-                  <a
-                    href={
-                      element.content.startsWith("http")
-                        ? element.content
-                        : `https://twitter.com/i/status/${element.data?.id}`
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-blue-600 hover:underline"
-                  >
-                    Ver tweet original →
-                  </a>
-                </div>
-              );
-
-            default:
-              return null;
-          }
-        })}
-      </div>
-    );
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-7xl space-y-6 p-6">
-        {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-gray-900">
             Tópico de Discussão
           </h1>
         </div>
 
-        {/* Breadcrumb */}
-        <nav className="mb-6 flex items-center space-x-2 rounded-lg bg-white p-3 text-sm text-gray-600 shadow-sm">
-          <a href="#" className="flex items-center gap-1 hover:text-blue-600">
-            <MessageSquare className="h-4 w-4" />
-            Fóruns
-          </a>
-          <ChevronRight className="h-4 w-4" />
-          <a href="#" className="flex items-center gap-1 hover:text-blue-600">
-            <MessageSquare className="h-4 w-4" />
-            Categoria
-          </a>
-          <ChevronRight className="h-4 w-4" />
-          <a href="#" className="flex items-center gap-1 hover:text-blue-600">
-            <MessageSquare className="h-4 w-4" />
-            Fórum
-          </a>
-        </nav>
+        <Breadcrumb />
+        <ThreadHeader thread={thread} />
 
-        {/* Thread Header */}
-        <div className="mb-6 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white shadow-lg md:p-6">
-          <h1 className="mb-4 text-xl font-bold break-words md:text-3xl">
-            {thread.title}
-          </h1>
-
-          <div className="flex flex-col space-y-3 text-sm md:flex-row md:items-center md:space-y-0 md:space-x-6">
-            <div className="flex items-center space-x-2">
-              <div className="flex items-center space-x-1">
-                <User className="h-4 w-4" />
-                <span className="hidden md:inline">Autor:</span>
-                <a href="#" className="truncate font-medium hover:underline">
-                  {thread.userName || "Usuário Anônimo"}
-                </a>
-              </div>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Clock className="h-4 w-4" />
-              <span className="hidden md:inline">Criado em:</span>
-              <span>
-                {new Date(thread.createdAt).toLocaleDateString("pt-BR")}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Posts */}
         {displayPosts.length > 0 ? (
           <div className="space-y-6">
             {displayPosts.map((post) => (
-              <Card
-                key={post.id}
-                className="overflow-hidden border border-gray-200 bg-white p-0 transition-all duration-300 hover:border-gray-300 hover:shadow-md"
-              >
-                {/* Layout Mobile: Avatar em cima */}
-                <div className="block md:hidden">
-                  {/* Header Mobile com Avatar */}
-                  <div className="border-b bg-gray-50 p-4">
-                    <div className="flex items-center space-x-3">
-                      <Avatar className="h-12 w-12 border border-gray-200">
-                        <AvatarImage
-                          src={
-                            post.userAvatar ||
-                            `/placeholder.svg?height=48&width=48&query=${post.author || "/placeholder.svg"}`
-                          }
-                        />
-                        <AvatarFallback className="bg-gray-100 text-gray-600">
-                          {post.author.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2">
-                          <h3 className="cursor-pointer font-semibold text-gray-900 hover:text-blue-600 hover:underline">
-                            {post.author}
-                          </h3>
-                          <Badge
-                            variant="secondary"
-                            className="bg-gray-100 text-xs text-gray-700"
-                          >
-                            {post.title}
-                          </Badge>
-                          {post.isOriginalPoster && (
-                            <Badge
-                              variant="default"
-                              className="bg-blue-600 text-xs"
-                            >
-                              OP
-                            </Badge>
-                          )}
-                        </div>
-
-                        <div className="mt-1 flex items-center space-x-3 text-xs text-gray-600">
-                          <span>Posts: {post.posts}</span>
-                          <span>Likes: {post.likes}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-3 flex items-center justify-between">
-                      <span className="text-sm text-gray-600">
-                        {post.timestamp}
-                      </span>
-                      <Badge
-                        variant="outline"
-                        className="border-gray-300 text-xs text-gray-600"
-                      >
-                        Mensagem
-                      </Badge>
-                    </div>
-                  </div>
-
-                  {/* Content Mobile */}
-                  <div className="bg-white p-4">
-                    {renderBBCodeContent(post.content)}
-                  </div>
-                </div>
-
-                {/* Layout Desktop: Avatar do lado */}
-                <div className="hidden md:flex">
-                  {/* User Info Sidebar - Desktop */}
-                  <div className="w-48 border-r bg-gray-50 p-4">
-                    <div className="text-center">
-                      <Avatar className="mx-auto mb-2 h-16 w-16 border border-gray-200">
-                        <AvatarImage
-                          src={
-                            post.userAvatar ||
-                            `/placeholder.svg?height=64&width=64&query=${post.author || "/placeholder.svg"}`
-                          }
-                        />
-                        <AvatarFallback className="bg-gray-100 text-gray-600">
-                          {post.author.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <h3 className="cursor-pointer font-semibold text-gray-900 hover:text-blue-600 hover:underline">
-                        {post.author}
-                      </h3>
-                      <Badge
-                        variant="secondary"
-                        className="mb-2 bg-gray-100 text-xs text-gray-700"
-                      >
-                        {post.title}
-                      </Badge>
-                      {post.isOriginalPoster && (
-                        <Badge
-                          variant="default"
-                          className="mb-2 bg-blue-600 text-xs"
-                        >
-                          OP
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="mt-3 space-y-1 text-xs text-gray-600">
-                      <div>Membro desde: {post.joinDate}</div>
-                      <div>Posts: {post.posts}</div>
-                      <div>Likes: {post.likes}</div>
-                    </div>
-                  </div>
-
-                  {/* Post Content Desktop */}
-                  <div className="flex-1 bg-white p-4">
-                    <div className="mb-3 flex items-center justify-between">
-                      <span className="text-sm text-gray-600">
-                        {post.timestamp}
-                      </span>
-                      <Badge
-                        variant="outline"
-                        className="border-gray-300 text-xs text-gray-600"
-                      >
-                        Mensagem
-                      </Badge>
-                    </div>
-                    {renderBBCodeContent(post.content)}
-                  </div>
-                </div>
-              </Card>
+              <PostCard key={post.id} post={post} />
             ))}
           </div>
         ) : (
-          <Card className="border border-gray-200 bg-gray-50 p-8 text-center">
-            <MessageSquare className="mx-auto mb-4 h-12 w-12 text-gray-400" />
-            <h3 className="mb-2 text-lg font-semibold text-gray-700">
-              Ainda não há mensagens
-            </h3>
-            <p className="text-gray-600">
-              Seja o primeiro a responder a este tópico!
-            </p>
-          </Card>
+          <EmptyState />
         )}
 
         <ReplyForm
@@ -381,23 +486,11 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
           forum={slug}
         />
 
-        {/* Thread Stats */}
-        <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-1 text-gray-700">
-                <Eye className="h-4 w-4" />
-                <span>{thread.views || 1247} visualizações</span>
-              </div>
-              <div className="flex items-center space-x-1 text-gray-700">
-                <MessageSquare className="h-4 w-4" />
-                <span>{displayPosts.length} respostas</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ThreadStats
+          views={thread.views || 1247}
+          repliesCount={displayPosts.length}
+        />
 
-        {/* Footer */}
         <div className="mt-8 text-center">
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
             <p className="text-xs text-gray-600">

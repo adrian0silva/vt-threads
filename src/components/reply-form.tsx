@@ -53,12 +53,7 @@ export const ReplyForm = forwardRef<ReplyFormHandle, ReplyFormProps>(
     useImperativeHandle(ref, () => ({
       replyTo(username: string, postContent: string) {
         const quoted =
-          `@${username} esreveu:\n` +
-          postContent
-            .split("\n")
-            .map((line) => `> ${line}`)
-            .join("\n") +
-          "\n\n";
+          `[quote=${username}]${postContent}[/quote]\n\n`;
         setContent(quoted);
 
         setTimeout(() => {

@@ -27,6 +27,7 @@ interface BBCodeElement {
   data?: {
     url?: string;
     id?: string;
+    username?: string;
   };
 }
 
@@ -104,6 +105,21 @@ function BBCodeContent({ content }: { content: string }) {
             >
               Ver tweet original →
             </a>
+          </div>
+        );
+
+      case "quote":
+        return (
+          <div
+            key={index}
+            className="my-4 rounded-md border border-red-900/50 bg-background/50 p-4"
+          >
+            <div className="mb-2 font-bold text-red-600">
+              {element.data?.username ? `${element.data.username}:` : "Quote:"}
+            </div>
+            <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+              {element.content}
+            </div>
           </div>
         );
 

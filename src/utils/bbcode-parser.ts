@@ -13,7 +13,7 @@ export function parseBBCode(content: string): BBCodeElement[] {
     { type: "youtube", regex: /\[youtube\](.*?)\[\/youtube\]/g },
     { type: "twitter", regex: /\[twitter\](.*?)\[\/twitter\]/g },
     { type: "image", regex: /\[img\](.*?)\[\/img\]/g },
-    { type: "quote", regex: /\[quote(?:=(.*?))?\](.*?)\[\/quote\]/g },
+    { type: "quote", regex: /\[quote(?:=(.*?))?\]([\s\S]*?)\[\/quote\]/g },
   ]
 
   let lastIndex = 0

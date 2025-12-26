@@ -130,7 +130,7 @@ const ForumDetailsPage = async ({ params }: ForumPageProps) => {
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                     {/* Avatar do autor */}
                     <div className="flex items-center gap-3 sm:flex-col sm:items-center">
-                      <Avatar className="h-10 w-10 flex-shrink-0 border border-gray-200 sm:h-12 sm:w-12">
+                      <Avatar className="h-10 w-10 flex-shrink-0 rounded-none border border-gray-200 sm:h-12 sm:w-12">
                         <AvatarImage
                           src={thread.userAvatar || "/placeholder.svg"}
                           alt={thread.userName || "Usuário"}

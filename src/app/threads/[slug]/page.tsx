@@ -3,6 +3,8 @@ import { eq } from "drizzle-orm";
 import { ChevronRight, Clock, Eye, MessageSquare, User } from "lucide-react";
 import { headers } from "next/headers";
 
+export const dynamic = "force-dynamic";
+
 import { ReplyForm } from "@/components/reply-form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +14,7 @@ import { db } from "@/db";
 import { postTable, threadTable, userTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { parseBBCode } from "@/utils/bbcode-parser";
-import { ThreadSkeleton } from "@/components/thread-skeleton";
+import { ThreadPostsSkeleton } from "@/components/thread-posts-skeleton";
 
 interface ThreadPageProps {
   params: Promise<{ slug: string }>;
@@ -382,33 +384,28 @@ function EmptyState() {
   );
 }
 
-async function ThreadContent({ params }: { params: Promise<{ slug: string }> }) {
+interface ThreadData {
+  id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  views: number | null;
+  userId: string | null;
+  userName: string | null;
+  userAvatar: string | null;
+  createdAt: Date;
+}
+
+async function ThreadPostsList({
+  thread,
+  slug,
+}: {
+  thread: ThreadData;
+  slug: string;
+}) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-
-  const { slug } = await params;
-
-  // Buscar thread
-  const [thread] = await db
-    .select({
-      id: threadTable.id,
-      title: threadTable.title,
-      slug: threadTable.slug,
-      description: threadTable.description,
-      views: threadTable.views,
-      userId: threadTable.userId,
-      userName: userTable.name,
-      userAvatar: userTable.image,
-      createdAt: threadTable.createdAt,
-    })
-    .from(threadTable)
-    .leftJoin(userTable, eq(threadTable.userId, userTable.id))
-    .where(eq(threadTable.slug, slug))
-    .limit(1)
-    .execute();
-
-  if (!thread) throw new Error("Thread não encontrada");
 
   // Buscar posts
   const posts = await db
@@ -461,9 +458,6 @@ async function ThreadContent({ params }: { params: Promise<{ slug: string }> }) 
 
   return (
     <>
-      <Breadcrumb />
-      <ThreadHeader thread={thread} />
-
       {displayPosts.length > 0 ? (
         <div className="space-y-6">
           {displayPosts.map((post) => (
@@ -497,7 +491,30 @@ async function ThreadContent({ params }: { params: Promise<{ slug: string }> }) 
   );
 }
 
-export default function ThreadPage({ params }: ThreadPageProps) {
+export default async function ThreadPage({ params }: ThreadPageProps) {
+  const { slug } = await params;
+
+  // Buscar thread
+  const [thread] = await db
+    .select({
+      id: threadTable.id,
+      title: threadTable.title,
+      slug: threadTable.slug,
+      description: threadTable.description,
+      views: threadTable.views,
+      userId: threadTable.userId,
+      userName: userTable.name,
+      userAvatar: userTable.image,
+      createdAt: threadTable.createdAt,
+    })
+    .from(threadTable)
+    .leftJoin(userTable, eq(threadTable.userId, userTable.id))
+    .where(eq(threadTable.slug, slug))
+    .limit(1)
+    .execute();
+
+  if (!thread) throw new Error("Thread não encontrada");
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-7xl space-y-6 p-6">
@@ -507,8 +524,11 @@ export default function ThreadPage({ params }: ThreadPageProps) {
           </h1>
         </div>
 
-        <Suspense fallback={<ThreadSkeleton />}>
-          <ThreadContent params={params} />
+        <Breadcrumb />
+        <ThreadHeader thread={thread} />
+
+        <Suspense fallback={<ThreadPostsSkeleton />}>
+          <ThreadPostsList thread={thread} slug={slug} />
         </Suspense>
       </div>
     </div>

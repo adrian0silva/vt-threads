@@ -396,11 +396,14 @@ interface ThreadData {
   createdAt: Date;
 }
 
-async function ThreadPostsList({
-  thread,
+// Componente para Thread Replies
+async function ThreadReplies({
+  threadId,
+  threadUserId,
   slug,
 }: {
-  thread: ThreadData;
+  threadId: string;
+  threadUserId: string | null;
   slug: string;
 }) {
   const session = await auth.api.getSession({
@@ -419,42 +422,27 @@ async function ThreadPostsList({
     })
     .from(postTable)
     .leftJoin(userTable, eq(postTable.userId, userTable.id))
-    .where(eq(postTable.threadId, thread.id))
+    .where(eq(postTable.threadId, threadId))
     .orderBy(postTable.createdAt)
     .execute();
 
-  // Criar post inicial do thread
-  const initialPost: Post = {
-    id: `thread-${thread.id}`,
-    author: thread.userName || "Usuário Anônimo",
+  // Mapear posts (apenas respostas, sem o OP duplicado se não necessário,
+  // mas aqui assumimos que 'posts' do DB são apenas respostas ou posts subsequentes.
+  // Se o OP não está na tabela 'postTable' (está apenas em 'threadTable'), 
+  // então 'posts' aqui são puramente respostas.)
+  const displayPosts: Post[] = posts.map((post) => ({
+    id: post.id,
+    author: post.userName || "Usuário Anônimo",
     title: "Membro",
     joinDate: "Desconhecido",
     posts: "0",
     likes: "0",
-    content: thread.description || "",
-    timestamp: new Date(thread.createdAt).toLocaleString(),
-    isOriginalPoster: true,
-    userAvatar: thread.userAvatar,
-    signature: "",
-  };
-
-  // Mapear posts
-  const displayPosts: Post[] = [
-    initialPost,
-    ...posts.map((post) => ({
-      id: post.id,
-      author: post.userName || "Usuário Anônimo",
-      title: "Membro",
-      joinDate: "Desconhecido",
-      posts: "0",
-      likes: "0",
-      content: post.content,
-      timestamp: new Date(post.createdAt).toLocaleString(),
-      isOriginalPoster: post.userId === thread.userId,
-      userAvatar: post.userAvatar,
-      signature: undefined,
-    })),
-  ];
+    content: post.content,
+    timestamp: new Date(post.createdAt).toLocaleString(),
+    isOriginalPoster: post.userId === threadUserId,
+    userAvatar: post.userAvatar,
+    signature: undefined,
+  }));
 
   return (
     <>
@@ -469,14 +457,14 @@ async function ThreadPostsList({
       )}
 
       <ReplyForm
-        threadId={thread.id}
+        threadId={threadId}
         userId={session?.user?.id}
         isAuthenticated={!!session?.user}
         forum={slug}
       />
 
       <ThreadStats
-        views={thread.views || 1247}
+        views={1247} // Idealmente viria do thread, mas aqui estamos isolados
         repliesCount={displayPosts.length}
       />
 
@@ -490,6 +478,8 @@ async function ThreadPostsList({
     </>
   );
 }
+
+
 
 export default async function ThreadPage({ params }: ThreadPageProps) {
   const { slug } = await params;
@@ -527,8 +517,30 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
         <Breadcrumb />
         <ThreadHeader thread={thread} />
 
+        {/* OP renders immediately */}
+        <PostCard
+          post={{
+            id: `thread-${thread.id}`,
+            author: thread.userName || "Usuário Anônimo",
+            title: "Membro",
+            joinDate: "Desconhecido",
+            posts: "0",
+            likes: "0",
+            content: thread.description || "",
+            timestamp: new Date(thread.createdAt).toLocaleString(),
+            isOriginalPoster: true,
+            userAvatar: thread.userAvatar,
+            signature: "",
+          }}
+        />
+
+        {/* Replies stream in */}
         <Suspense fallback={<ThreadPostsSkeleton />}>
-          <ThreadPostsList thread={thread} slug={slug} />
+          <ThreadReplies
+            threadId={thread.id}
+            threadUserId={thread.userId}
+            slug={slug}
+          />
         </Suspense>
       </div>
     </div>

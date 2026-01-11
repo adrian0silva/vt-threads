@@ -1,7 +1,5 @@
 "use client";
 
-import { Suspense } from "react";
-
 import {
   AlignCenter,
   AlignLeft,
@@ -26,6 +24,7 @@ import {
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import type React from "react";
+import { Suspense } from "react";
 import { useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -440,7 +439,13 @@ const PostThreadContent = () => {
 
 export default function PostThread() {
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center p-8">Carregando...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center p-8">
+          Carregando...
+        </div>
+      }
+    >
       <PostThreadContent />
     </Suspense>
   );

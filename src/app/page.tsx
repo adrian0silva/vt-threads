@@ -1,24 +1,25 @@
-import { Suspense } from "react";
 import { eq, sql } from "drizzle-orm";
-import { Clock, MessageSquare, User } from "lucide-react";
-import Link from "next/link";
+import { Clock, MessageSquare, PlusIcon, User } from "lucide-react";
 import { headers } from "next/headers";
+import Link from "next/link";
+import { Suspense } from "react";
 
+import { CreateThread } from "@/components/create-thread";
+import { HomeSkeleton } from "@/components/home-skeleton";
 import { RightRail } from "@/components/right-rail";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { db } from "@/db";
 import { postTable, threadTable, userTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
-import { CreateThread } from "@/components/create-thread";
-import { HomeSkeleton } from "@/components/home-skeleton";
+import { Button } from "@/components/ui/button";
 
 async function HomeContent() {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
   const forums = await db.query.forumTable.findMany({});
-  
+
   const threads = await db
     .select({
       id: threadTable.id,
@@ -48,13 +49,6 @@ async function HomeContent() {
     <>
       {/* Navigation */}
       <div className="mb-6">
-        <h2 className="mb-4 text-2xl font-bold text-gray-800">
-          Fóruns de Discussão
-        </h2>
-        <p className="mb-6 text-gray-600">
-          Participe de discussões sobre diversos temas. Mantenha o respeito e
-          contribua com conteúdo de qualidade.
-        </p>
         {session?.user && <CreateThread forums={forums} />}
       </div>
 
@@ -171,6 +165,13 @@ export default function Home() {
           Bem-vindo ao nosso fórum de discussão
         </p>
       </div>
+      <h2 className="mb-4 text-2xl font-bold text-gray-800">
+        Fóruns de Discussão
+      </h2>
+      <p className="mb-6 text-gray-600">
+        Participe de discussões sobre diversos temas. Mantenha o respeito e
+        contribua com conteúdo de qualidade.
+      </p>
 
       <Suspense fallback={<HomeSkeleton />}>
         <HomeContent />

@@ -1,19 +1,17 @@
-import { Suspense } from "react";
 import { eq, sql } from "drizzle-orm";
 import { Clock, Eye, MessageSquare, PlusIcon, User } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
+import { ForumSkeleton } from "@/components/forum-skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { db } from "@/db";
 import { forumTable, postTable, threadTable, userTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
-import { ForumSkeleton } from "@/components/forum-skeleton";
-
-
 
 interface ForumPageProps {
   params: Promise<{ slug: string }>;
@@ -79,8 +77,7 @@ async function ForumContent({ params }: { params: Promise<{ slug: string }> }) {
               <div className="flex items-center gap-1">
                 <MessageSquare className="h-4 w-4" />
                 <span>
-                  {threads.reduce((sum, t) => sum + t.postsCount, 0)}{" "}
-                  Mensagens
+                  {threads.reduce((sum, t) => sum + t.postsCount, 0)} Mensagens
                 </span>
               </div>
             </div>

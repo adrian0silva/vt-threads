@@ -3,6 +3,8 @@ import { eq } from "drizzle-orm";
 import { ChevronRight, Clock, Eye, MessageSquare, User } from "lucide-react";
 import { headers } from "next/headers";
 
+export const dynamic = "force-dynamic";
+
 import { ReplyForm } from "@/components/reply-form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +14,7 @@ import { db } from "@/db";
 import { postTable, threadTable, userTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { parseBBCode } from "@/utils/bbcode-parser";
-import { ThreadSkeleton } from "@/components/thread-skeleton";
+import { ThreadPostsSkeleton } from "@/components/thread-posts-skeleton";
 
 interface ThreadPageProps {
   params: Promise<{ slug: string }>;
@@ -382,11 +384,104 @@ function EmptyState() {
   );
 }
 
-async function ThreadContent({ params }: { params: Promise<{ slug: string }> }) {
+interface ThreadData {
+  id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  views: number | null;
+  userId: string | null;
+  userName: string | null;
+  userAvatar: string | null;
+  createdAt: Date;
+}
+
+// Componente para Thread Replies
+async function ThreadReplies({
+  threadId,
+  threadUserId,
+  slug,
+}: {
+  threadId: string;
+  threadUserId: string | null;
+  slug: string;
+}) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
 
+  // Buscar posts
+  const posts = await db
+    .select({
+      id: postTable.id,
+      content: postTable.content,
+      createdAt: postTable.createdAt,
+      userName: userTable.name,
+      userAvatar: userTable.image,
+      userId: postTable.userId,
+    })
+    .from(postTable)
+    .leftJoin(userTable, eq(postTable.userId, userTable.id))
+    .where(eq(postTable.threadId, threadId))
+    .orderBy(postTable.createdAt)
+    .execute();
+
+  // Mapear posts (apenas respostas, sem o OP duplicado se não necessário,
+  // mas aqui assumimos que 'posts' do DB são apenas respostas ou posts subsequentes.
+  // Se o OP não está na tabela 'postTable' (está apenas em 'threadTable'), 
+  // então 'posts' aqui são puramente respostas.)
+  const displayPosts: Post[] = posts.map((post) => ({
+    id: post.id,
+    author: post.userName || "Usuário Anônimo",
+    title: "Membro",
+    joinDate: "Desconhecido",
+    posts: "0",
+    likes: "0",
+    content: post.content,
+    timestamp: new Date(post.createdAt).toLocaleString(),
+    isOriginalPoster: post.userId === threadUserId,
+    userAvatar: post.userAvatar,
+    signature: undefined,
+  }));
+
+  return (
+    <>
+      {displayPosts.length > 0 ? (
+        <div className="space-y-6">
+          {displayPosts.map((post) => (
+            <PostCard key={post.id} post={post} />
+          ))}
+        </div>
+      ) : (
+        <EmptyState />
+      )}
+
+      <ReplyForm
+        threadId={threadId}
+        userId={session?.user?.id}
+        isAuthenticated={!!session?.user}
+        forum={slug}
+      />
+
+      <ThreadStats
+        views={1247} // Idealmente viria do thread, mas aqui estamos isolados
+        repliesCount={displayPosts.length}
+      />
+
+      <div className="mt-8 text-center">
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+          <p className="text-xs text-gray-600">
+            VT Forums - Fórum de Discussão
+          </p>
+        </div>
+      </div>
+    </>
+  );
+}
+
+
+
+export default async function ThreadPage({ params }: ThreadPageProps) {
   const { slug } = await params;
 
   // Buscar thread
@@ -410,94 +505,6 @@ async function ThreadContent({ params }: { params: Promise<{ slug: string }> }) 
 
   if (!thread) throw new Error("Thread não encontrada");
 
-  // Buscar posts
-  const posts = await db
-    .select({
-      id: postTable.id,
-      content: postTable.content,
-      createdAt: postTable.createdAt,
-      userName: userTable.name,
-      userAvatar: userTable.image,
-      userId: postTable.userId,
-    })
-    .from(postTable)
-    .leftJoin(userTable, eq(postTable.userId, userTable.id))
-    .where(eq(postTable.threadId, thread.id))
-    .orderBy(postTable.createdAt)
-    .execute();
-
-  // Criar post inicial do thread
-  const initialPost: Post = {
-    id: `thread-${thread.id}`,
-    author: thread.userName || "Usuário Anônimo",
-    title: "Membro",
-    joinDate: "Desconhecido",
-    posts: "0",
-    likes: "0",
-    content: thread.description || "",
-    timestamp: new Date(thread.createdAt).toLocaleString(),
-    isOriginalPoster: true,
-    userAvatar: thread.userAvatar,
-    signature: "",
-  };
-
-  // Mapear posts
-  const displayPosts: Post[] = [
-    initialPost,
-    ...posts.map((post) => ({
-      id: post.id,
-      author: post.userName || "Usuário Anônimo",
-      title: "Membro",
-      joinDate: "Desconhecido",
-      posts: "0",
-      likes: "0",
-      content: post.content,
-      timestamp: new Date(post.createdAt).toLocaleString(),
-      isOriginalPoster: post.userId === thread.userId,
-      userAvatar: post.userAvatar,
-      signature: undefined,
-    })),
-  ];
-
-  return (
-    <>
-      <Breadcrumb />
-      <ThreadHeader thread={thread} />
-
-      {displayPosts.length > 0 ? (
-        <div className="space-y-6">
-          {displayPosts.map((post) => (
-            <PostCard key={post.id} post={post} />
-          ))}
-        </div>
-      ) : (
-        <EmptyState />
-      )}
-
-      <ReplyForm
-        threadId={thread.id}
-        userId={session?.user?.id}
-        isAuthenticated={!!session?.user}
-        forum={slug}
-      />
-
-      <ThreadStats
-        views={thread.views || 1247}
-        repliesCount={displayPosts.length}
-      />
-
-      <div className="mt-8 text-center">
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-          <p className="text-xs text-gray-600">
-            VT Forums - Fórum de Discussão
-          </p>
-        </div>
-      </div>
-    </>
-  );
-}
-
-export default function ThreadPage({ params }: ThreadPageProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-7xl space-y-6 p-6">
@@ -507,8 +514,33 @@ export default function ThreadPage({ params }: ThreadPageProps) {
           </h1>
         </div>
 
-        <Suspense fallback={<ThreadSkeleton />}>
-          <ThreadContent params={params} />
+        <Breadcrumb />
+        <ThreadHeader thread={thread} />
+
+        {/* OP renders immediately */}
+        <PostCard
+          post={{
+            id: `thread-${thread.id}`,
+            author: thread.userName || "Usuário Anônimo",
+            title: "Membro",
+            joinDate: "Desconhecido",
+            posts: "0",
+            likes: "0",
+            content: thread.description || "",
+            timestamp: new Date(thread.createdAt).toLocaleString(),
+            isOriginalPoster: true,
+            userAvatar: thread.userAvatar,
+            signature: "",
+          }}
+        />
+
+        {/* Replies stream in */}
+        <Suspense fallback={<ThreadPostsSkeleton />}>
+          <ThreadReplies
+            threadId={thread.id}
+            threadUserId={thread.userId}
+            slug={slug}
+          />
         </Suspense>
       </div>
     </div>

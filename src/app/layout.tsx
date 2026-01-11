@@ -5,6 +5,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { ForumSidebar } from "@/components/forum-sidebar";
+import { PresencePing } from "@/components/presence-ping";
 import { SiteHeader } from "@/components/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
 import {
@@ -35,6 +36,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <PresencePing />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

@@ -1,9 +1,12 @@
 import { Eye, MessageSquare, Users } from "lucide-react";
 
+import { OnlineStats } from "@/components/online/OnlineStats";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { getTotalUsers } from "@/lib/stats";
 
-export function RightRail() {
+export async function RightRail() {
+  const totalUsers = await getTotalUsers();
   return (
     <div className="flex w-full flex-col gap-4 lg:w-80">
       {/* Estatísticas do Fórum */}
@@ -14,26 +17,15 @@ export function RightRail() {
             <h4 className="font-semibold text-gray-800">Estatísticas</h4>
           </div>
           <dl className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <dt className="flex items-center gap-1 text-gray-600">
-                <Users className="h-4 w-4" />
-                Usuários Online:
-              </dt>
-              <dd className="font-bold text-gray-800">1,780</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="flex items-center gap-1 text-gray-600">
-                <Eye className="h-4 w-4" />
-                Visitantes:
-              </dt>
-              <dd className="font-bold text-gray-800">10,711</dd>
-            </div>
+            <OnlineStats />
             <div className="flex justify-between">
               <dt className="flex items-center gap-1 text-gray-600">
                 <Users className="h-4 w-4" />
                 Total de Membros:
               </dt>
-              <dd className="font-bold text-gray-800">12,491</dd>
+              <dd className="font-bold text-gray-800">
+                {totalUsers.toLocaleString("pt-BR")}
+              </dd>
             </div>
           </dl>
         </CardContent>

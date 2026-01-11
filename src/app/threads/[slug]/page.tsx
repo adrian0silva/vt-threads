@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { eq } from "drizzle-orm";
 import { ChevronRight, Clock, Eye, MessageSquare, User } from "lucide-react";
 import { headers } from "next/headers";
@@ -11,6 +12,7 @@ import { db } from "@/db";
 import { postTable, threadTable, userTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { parseBBCode } from "@/utils/bbcode-parser";
+import { ThreadSkeleton } from "@/components/thread-skeleton";
 
 interface ThreadPageProps {
   params: Promise<{ slug: string }>;
@@ -380,7 +382,7 @@ function EmptyState() {
   );
 }
 
-export default async function ThreadPage({ params }: ThreadPageProps) {
+async function ThreadContent({ params }: { params: Promise<{ slug: string }> }) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -458,6 +460,45 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
   ];
 
   return (
+    <>
+      <Breadcrumb />
+      <ThreadHeader thread={thread} />
+
+      {displayPosts.length > 0 ? (
+        <div className="space-y-6">
+          {displayPosts.map((post) => (
+            <PostCard key={post.id} post={post} />
+          ))}
+        </div>
+      ) : (
+        <EmptyState />
+      )}
+
+      <ReplyForm
+        threadId={thread.id}
+        userId={session?.user?.id}
+        isAuthenticated={!!session?.user}
+        forum={slug}
+      />
+
+      <ThreadStats
+        views={thread.views || 1247}
+        repliesCount={displayPosts.length}
+      />
+
+      <div className="mt-8 text-center">
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+          <p className="text-xs text-gray-600">
+            VT Forums - Fórum de Discussão
+          </p>
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default function ThreadPage({ params }: ThreadPageProps) {
+  return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-7xl space-y-6 p-6">
         <div className="mb-8 text-center">
@@ -466,38 +507,9 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
           </h1>
         </div>
 
-        <Breadcrumb />
-        <ThreadHeader thread={thread} />
-
-        {displayPosts.length > 0 ? (
-          <div className="space-y-6">
-            {displayPosts.map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
-          </div>
-        ) : (
-          <EmptyState />
-        )}
-
-        <ReplyForm
-          threadId={thread.id}
-          userId={session?.user?.id}
-          isAuthenticated={!!session?.user}
-          forum={slug}
-        />
-
-        <ThreadStats
-          views={thread.views || 1247}
-          repliesCount={displayPosts.length}
-        />
-
-        <div className="mt-8 text-center">
-          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-            <p className="text-xs text-gray-600">
-              VT Forums - Fórum de Discussão
-            </p>
-          </div>
-        </div>
+        <Suspense fallback={<ThreadSkeleton />}>
+          <ThreadContent params={params} />
+        </Suspense>
       </div>
     </div>
   );

@@ -1,5 +1,7 @@
 "use client";
 
+import { Suspense } from "react";
+
 import {
   AlignCenter,
   AlignLeft,
@@ -49,7 +51,7 @@ interface Forum {
   // outras propriedades...
 }
 
-const PostThread = () => {
+const PostThreadContent = () => {
   const router = useRouter();
   const params = useParams();
   const forumSlug = params.slug;
@@ -436,4 +438,10 @@ const PostThread = () => {
   );
 };
 
-export default PostThread;
+export default function PostThread() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center p-8">Carregando...</div>}>
+      <PostThreadContent />
+    </Suspense>
+  );
+}

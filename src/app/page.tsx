@@ -1,4 +1,4 @@
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { Clock, MessageSquare, PlusIcon, User } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -10,9 +10,15 @@ import { RightRail } from "@/components/right-rail";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { db } from "@/db";
-import { postTable, threadTable, userTable } from "@/db/schema";
+import {
+  postTable,
+  threadReadTable,
+  threadTable,
+  userTable,
+} from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 async function HomeContent() {
   const session = await auth.api.getSession({
@@ -28,23 +34,38 @@ async function HomeContent() {
       description: threadTable.description,
       createdAt: threadTable.createdAt,
       views: threadTable.views,
+      lastPostAt: threadTable.lastPostAt,
       postsCount: sql<number>`COUNT(${postTable.id})`.mapWith(Number),
+      lastReadAt: threadReadTable.lastReadAt,
+      isUnread: sql<boolean>`
+        ${threadReadTable.lastReadAt} IS NULL
+        OR ${threadReadTable.lastReadAt} < ${threadTable.lastPostAt}
+      `,
       userName: userTable.name,
       userAvatar: userTable.image,
     })
     .from(threadTable)
     .leftJoin(postTable, eq(postTable.threadId, threadTable.id))
     .leftJoin(userTable, eq(threadTable.userId, userTable.id))
+    .leftJoin(
+      threadReadTable,
+      and(
+        eq(threadReadTable.threadId, threadTable.id),
+        eq(threadReadTable.userId, session?.user?.id || ""),
+      ),
+    )
     .groupBy(
       threadTable.id,
       threadTable.title,
+      threadReadTable.lastReadAt,
       threadTable.slug,
       threadTable.description,
       threadTable.views,
       userTable.name,
       userTable.image,
     );
-
+  console.log("threads");
+  console.log(threads);
   return (
     <>
       {/* Navigation */}
@@ -57,7 +78,7 @@ async function HomeContent() {
         {threads.length === 0 ? (
           <div className="rounded-lg border border-gray-200 bg-gray-50 py-12 text-center">
             <div className="mb-4">
-              <MessageSquare className="mx-auto h-16 w-16 text-gray-400" />
+              <MessageSquare className="text-black-400 mx-auto h-16 w-16" />
             </div>
             <h3 className="mb-2 text-xl font-bold text-gray-700">
               Ainda não há tópicos
@@ -103,7 +124,14 @@ async function HomeContent() {
                     <div className="min-w-0 flex-1">
                       <div className="mb-2">
                         <Link href={`/threads/${thread.slug}`}>
-                          <h3 className="mb-1 line-clamp-2 text-base font-bold text-gray-900 transition-colors hover:text-blue-600 hover:underline sm:text-lg">
+                          <h3
+                            className={cn(
+                              "text-black-900 mb-1 line-clamp-2 text-base font-bold transition-colors hover:text-blue-600 hover:underline sm:text-lg",
+                              thread.isUnread
+                                ? "font-bold text-black"
+                                : "font-normal text-gray-600",
+                            )}
+                          >
                             {thread.title}
                           </h3>
                         </Link>

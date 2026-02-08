@@ -11,7 +11,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { db } from "@/db";
-import { postTable, threadTable, userTable } from "@/db/schema";
+import {
+  postTable,
+  threadReadTable,
+  threadTable,
+  userTable,
+} from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { parseBBCode } from "@/utils/bbcode-parser";
 import { ThreadPostsSkeleton } from "@/components/thread-posts-skeleton";
@@ -373,7 +378,7 @@ function ThreadStats({
 function EmptyState() {
   return (
     <Card className="border border-gray-200 bg-gray-50 p-8 text-center">
-      <MessageSquare className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+      <MessageSquare className="text-black-400 mx-auto mb-4 h-12 w-12" />
       <h3 className="mb-2 text-lg font-semibold text-gray-700">
         Ainda não há mensagens
       </h3>
@@ -428,7 +433,7 @@ async function ThreadReplies({
 
   // Mapear posts (apenas respostas, sem o OP duplicado se não necessário,
   // mas aqui assumimos que 'posts' do DB são apenas respostas ou posts subsequentes.
-  // Se o OP não está na tabela 'postTable' (está apenas em 'threadTable'), 
+  // Se o OP não está na tabela 'postTable' (está apenas em 'threadTable'),
   // então 'posts' aqui são puramente respostas.)
   const displayPosts: Post[] = posts.map((post) => ({
     id: post.id,
@@ -479,10 +484,12 @@ async function ThreadReplies({
   );
 }
 
-
-
 export default async function ThreadPage({ params }: ThreadPageProps) {
   const { slug } = await params;
+
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
   // Buscar thread
   const [thread] = await db
@@ -504,6 +511,21 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
     .execute();
 
   if (!thread) throw new Error("Thread não encontrada");
+  if (session?.user?.id) {
+    await db
+      .insert(threadReadTable)
+      .values({
+        userId: session.user.id,
+        threadId: thread.id,
+        lastReadAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [threadReadTable.userId, threadReadTable.threadId],
+        set: {
+          lastReadAt: new Date(),
+        },
+      });
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

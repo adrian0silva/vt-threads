@@ -341,7 +341,7 @@ const PostThreadContent = () => {
 
               <TabsContent value="poll">
                 <div className="rounded-xl border border-gray-200 bg-gray-50 p-8 text-center">
-                  <MessageSquare className="mx-auto mb-4 h-16 w-16 text-gray-400" />
+                  <MessageSquare className="text-black-400 mx-auto mb-4 h-16 w-16" />
                   <h3 className="mb-2 text-xl font-bold text-gray-700">
                     Criação de Enquete
                   </h3>

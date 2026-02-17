@@ -57,9 +57,12 @@ export const ReplyForm = forwardRef<ReplyFormHandle, ReplyFormProps>(
         setContent(quoted);
 
         setTimeout(() => {
-          textAreaRef.current?.scrollIntoView({ behavior: "smooth" });
+          textAreaRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
           textAreaRef.current?.focus();
-        }, 0);
+        }, 50);
       },
     }));
 
@@ -279,6 +282,7 @@ export const ReplyForm = forwardRef<ReplyFormHandle, ReplyFormProps>(
             </Collapsible>
 
             <Textarea
+              ref={textAreaRef}
               id="post-content"
               placeholder="Escreva sua resposta aqui... Use [img]URL[/img] para imagens, [youtube]ID[/youtube] para vídeos do YouTube, [twitter]URL[/twitter] para tweets"
               value={content}

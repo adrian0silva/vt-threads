@@ -1,4 +1,4 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { Clock, MessageSquare, PlusIcon, User } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import { CreateThread } from "@/components/create-thread";
 import { HomeSkeleton } from "@/components/home-skeleton";
 import { RightRail } from "@/components/right-rail";
+import { ThreadsPagination } from "@/components/threads-pagination";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { db } from "@/db";
@@ -20,11 +21,28 @@ import { auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-async function HomeContent() {
+const DEFAULT_PER = 20;
+
+async function HomeContent({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; per?: string }>;
+}) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
+  const params = await searchParams;
+  const page = Math.max(1, parseInt(params?.page ?? "1", 10) || 1);
+  const per = Math.min(100, Math.max(1, parseInt(params?.per ?? String(DEFAULT_PER), 10) || DEFAULT_PER));
+
   const forums = await db.query.forumTable.findMany({});
+
+  const countResult = await db
+    .select({ totalCount: sql<number>`count(*)::int` })
+    .from(threadTable);
+  const totalCount = countResult[0]?.totalCount ?? 0;
+  const totalPages = Math.ceil(totalCount / per) || 1;
+  const currentPage = Math.min(Math.max(1, page), totalPages);
 
   const threads = await db
     .select({
@@ -63,9 +81,11 @@ async function HomeContent() {
       threadTable.views,
       userTable.name,
       userTable.image,
-    );
-  console.log("threads");
-  console.log(threads);
+    )
+    .orderBy(desc(threadTable.lastPostAt))
+    .limit(per)
+    .offset((currentPage - 1) * per);
+
   return (
     <>
       {/* Navigation */}
@@ -171,6 +191,13 @@ async function HomeContent() {
                 </div>
               </Card>
             ))}
+            <ThreadsPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalCount}
+              per={per}
+              basePath="/"
+            />
           </div>
         )}
 
@@ -183,7 +210,11 @@ async function HomeContent() {
   );
 }
 
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; per?: string }>;
+}) {
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-6">
       {/* Header */}
@@ -202,7 +233,7 @@ export default function Home() {
       </p>
 
       <Suspense fallback={<HomeSkeleton />}>
-        <HomeContent />
+        <HomeContent searchParams={searchParams} />
       </Suspense>
     </main>
   );

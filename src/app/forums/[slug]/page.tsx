@@ -1,4 +1,4 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { Clock, Eye, MessageSquare, PlusIcon, User } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { ForumSkeleton } from "@/components/forum-skeleton";
+import { ThreadsPagination } from "@/components/threads-pagination";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -20,15 +21,33 @@ import {
 import { auth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
+const DEFAULT_PER = 10;
+
 interface ForumPageProps {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ page?: string; per?: string }>;
 }
 
-async function ForumContent({ params }: { params: Promise<{ slug: string }> }) {
+async function ForumContent({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ page?: string; per?: string }>;
+}) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
   const { slug } = await params;
+  const search = (await (searchParams ?? Promise.resolve({}))) as {
+    page?: string;
+    per?: string;
+  };
+  const page = Math.max(1, parseInt(search?.page ?? "1", 10) || 1);
+  const per = Math.min(
+    100,
+    Math.max(1, parseInt(search?.per ?? String(DEFAULT_PER), 10) || DEFAULT_PER),
+  );
 
   const forumEncontrado = await db.query.forumTable.findFirst({
     where: eq(forumTable.slug, slug),
@@ -37,6 +56,14 @@ async function ForumContent({ params }: { params: Promise<{ slug: string }> }) {
   if (!forumEncontrado?.id) {
     return notFound();
   }
+
+  const countResult = await db
+    .select({ totalCount: sql<number>`count(*)::int` })
+    .from(threadTable)
+    .where(eq(threadTable.forumId, forumEncontrado.id));
+  const totalCount = countResult[0]?.totalCount ?? 0;
+  const totalPages = Math.ceil(totalCount / per) || 1;
+  const currentPage = Math.min(Math.max(1, page), totalPages);
 
   const threads = await db
     .select({
@@ -76,7 +103,10 @@ async function ForumContent({ params }: { params: Promise<{ slug: string }> }) {
       threadTable.views,
       userTable.name,
       userTable.image,
-    );
+    )
+    .orderBy(desc(threadTable.lastPostAt))
+    .limit(per)
+    .offset((currentPage - 1) * per);
 
   return (
     <>
@@ -93,7 +123,7 @@ async function ForumContent({ params }: { params: Promise<{ slug: string }> }) {
             <div className="mt-3 flex flex-col gap-2 text-xs sm:flex-row sm:items-center sm:gap-4 sm:text-sm">
               <div className="flex items-center gap-1">
                 <Eye className="h-4 w-4" />
-                <span>{threads.length} Tópicos</span>
+                <span>{totalCount} Tópicos</span>
               </div>
               <div className="flex items-center gap-1">
                 <MessageSquare className="h-4 w-4" />
@@ -221,13 +251,23 @@ async function ForumContent({ params }: { params: Promise<{ slug: string }> }) {
               </div>
             </Card>
           ))}
+          <ThreadsPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalCount}
+            per={per}
+            basePath={`/forums/${slug}`}
+          />
         </div>
       )}
     </>
   );
 }
 
-const ForumDetailsPage = async ({ params }: ForumPageProps) => {
+const ForumDetailsPage = async ({
+  params,
+  searchParams,
+}: ForumPageProps) => {
   return (
     <div className="bg-black-50 min-h-screen">
       <div className="mx-auto max-w-7xl space-y-6 p-6">
@@ -238,7 +278,7 @@ const ForumDetailsPage = async ({ params }: ForumPageProps) => {
           </h1>
         </div>
         <Suspense fallback={<ForumSkeleton />}>
-          <ForumContent params={params} />
+          <ForumContent params={params} searchParams={searchParams} />
         </Suspense>
       </div>
     </div>

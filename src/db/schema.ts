@@ -19,7 +19,7 @@ export const userTable = pgTable("user", {
   emailVerified: boolean("email_verified")
     .$defaultFn(() => false)
     .notNull(),
-  image: text("image").$type<string | null>().default(null),
+  image: text("image").$type<string | null>().default('https://www.vtforums.com.br/eris-apple.png'),
   role: roleEnum("role").notNull().default("USER"),
   createdAt: timestamp("created_at")
     .$defaultFn(() => /* @__PURE__ */ new Date())

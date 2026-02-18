@@ -11,6 +11,7 @@ import { db } from "@/db";
 import { postTable, threadReadTable, threadTable, userTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { parseBBCode } from "@/utils/bbcode-parser";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 interface ThreadPageProps {
   params: Promise<{ slug: string }>;
@@ -30,6 +31,36 @@ interface Post {
   signature?: string | null;
 }
 
+function ThreadHeader({
+  thread,
+}: {
+  thread: { title: string; userName: string | null; createdAt: Date };
+}) {
+  return (
+    <div className="mb-6 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white shadow-lg md:p-6">
+      <h1 className="mb-4 text-xl font-bold break-words md:text-3xl">
+        {thread.title}
+      </h1>
+      <div className="flex flex-col space-y-3 text-sm md:flex-row md:items-center md:space-y-0 md:space-x-6">
+        <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1">
+            <User className="h-4 w-4" />
+            <span className="hidden md:inline">Autor:</span>
+            <a href="#" className="truncate font-medium hover:underline">
+              {thread.userName || "Usuário Anônimo"}
+            </a>
+          </div>
+        </div>
+        <div className="flex items-center space-x-1">
+          <Clock className="h-4 w-4" />
+          <span className="hidden md:inline">Criado em:</span>
+          <span>{new Date(thread.createdAt).toLocaleDateString("pt-BR")}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default async function ThreadPage({ params }: ThreadPageProps) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -38,8 +69,8 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
   const { slug } = await params;
 
   // Buscar thread
-    // Buscar thread
-    const [thread] = await db
+  // Buscar thread
+  const [thread] = await db
     .select({
       id: threadTable.id,
       title: threadTable.title,
@@ -131,48 +162,11 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
       forum={slug}
       userId={session?.user?.id || ""}
       isAuthenticated={!!session?.user}
+      thread={{
+        title: thread.title,
+        userName: thread.userName,
+        createdAt: thread.createdAt,
+      }}
     />
-    // <div className="min-h-screen bg-gray-50">
-    //   <div className="mx-auto max-w-7xl space-y-6 p-6">
-    //     <div className="mb-8 text-center">
-    //       <h1 className="text-3xl font-bold text-gray-900">
-    //         Tópico de Discussão
-    //       </h1>
-    //     </div>
-
-    //     <Breadcrumb />
-    //     <ThreadHeader thread={thread} />
-
-    //     {displayPosts.length > 0 ? (
-    //       <div className="space-y-6">
-    //         {displayPosts.map((post) => (
-    //           <PostCard key={post.id} post={post} />
-    //         ))}
-    //       </div>
-    //     ) : (
-    //       <EmptyState />
-    //     )}
-
-    //     <ReplyForm
-    //       threadId={thread.id}
-    //       userId={session?.user?.id}
-    //       isAuthenticated={!!session?.user}
-    //       forum={slug}
-    //     />
-
-    //     <ThreadStats
-    //       views={thread.views || 1247}
-    //       repliesCount={displayPosts.length}
-    //     />
-
-    //     <div className="mt-8 text-center">
-    //       <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-    //         <p className="text-xs text-gray-600">
-    //           VT Forums - Fórum de Discussão
-    //         </p>
-    //       </div>
-    //     </div>
-    //   </div>
-    // </div>
   );
 }

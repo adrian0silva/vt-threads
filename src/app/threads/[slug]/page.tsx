@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { ChevronRight, Clock, Eye, MessageSquare, User } from "lucide-react";
 import { headers } from "next/headers";
 
@@ -12,9 +12,13 @@ import { postTable, threadReadTable, threadTable, userTable } from "@/db/schema"
 import { auth } from "@/lib/auth";
 import { parseBBCode } from "@/utils/bbcode-parser";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { PostsPagination } from "@/components/posts-pagination";
+
+const DEFAULT_PER = 50;
 
 interface ThreadPageProps {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ page?: string; per?: string }>;
 }
 
 interface Post {
@@ -61,7 +65,7 @@ function ThreadHeader({
   );
 }
 
-export default async function ThreadPage({ params }: ThreadPageProps) {
+export default async function ThreadPage({ params, searchParams }: ThreadPageProps) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -105,6 +109,23 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
       });
   }
 
+  const search = (await (searchParams ?? Promise.resolve({}))) as {
+    page?: string;
+    per?: string;
+  };
+  const page = Math.max(1, parseInt(search?.page ?? "1", 10) || 1);
+  const per = Math.min(
+    100,
+    Math.max(1, parseInt(search?.per ?? String(DEFAULT_PER), 10) || DEFAULT_PER),
+  );
+
+  const countResult = await db
+    .select({ totalCount: sql<number>`count(*)::int` })
+    .from(postTable)
+    .where(eq(postTable.threadId, thread.id));
+  const totalCount = countResult[0]?.totalCount ?? 0;
+  const totalPages = Math.ceil(totalCount / per) || 1;
+  const currentPage = Math.min(Math.max(1, page), totalPages);
 
   // Buscar posts
   const posts = await db
@@ -120,8 +141,10 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
     .leftJoin(userTable, eq(postTable.userId, userTable.id))
     .where(eq(postTable.threadId, thread.id))
     .orderBy(postTable.createdAt)
+    .limit(per)
+    .offset((currentPage - 1) * per)
     .execute();
-
+  
   // Criar post inicial do thread
   const initialPost: Post = {
     id: `thread-${thread.id}`,
@@ -139,7 +162,7 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
 
   // Mapear posts
   const displayPosts: Post[] = [
-    initialPost,
+    ...(currentPage === 1 ? [initialPost] : []),
     ...posts.map((post) => ({
       id: post.id,
       author: post.userName || "Usuário Anônimo",
@@ -156,6 +179,7 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
   ];
 
   return (
+    <>  
     <ThreadClient
       posts={displayPosts}
       threadId={thread.id}
@@ -168,5 +192,13 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
         createdAt: thread.createdAt,
       }}
     />
+    <PostsPagination
+      currentPage={currentPage}
+      totalPages={totalPages}
+      totalItems={totalCount}
+      per={per}
+      basePath={`/threads/${slug}`}
+    />
+  </>
   );
 }

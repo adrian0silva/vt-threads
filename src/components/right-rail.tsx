@@ -1,17 +1,59 @@
 import { Eye, MessageSquare, Users } from "lucide-react";
+import Link from "next/link";
 
 import { OnlineStats } from "@/components/online/OnlineStats";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getTotalForums, getTotalPosts, getTotalTopics, getTotalUsers } from "@/lib/stats";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export async function RightRail() {
   const totalUsers = await getTotalUsers();
   const totalForums = await getTotalForums();
   const totalTopics = await getTotalTopics();
   const totalPosts = await getTotalPosts();
+  const session = await auth.api.getSession({ headers: await headers() });
+
   return (
     <div className="flex w-full flex-col gap-4 lg:w-80">
+      {/* Filtros rápidos */}
+      <Card className="border border-gray-200 bg-white">
+        <CardContent className="p-4">
+          <h4 className="mb-3 font-semibold text-gray-800">Filtros</h4>
+          <div className="flex flex-col gap-2">
+            <Link
+              href="/"
+              className="rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            >
+              Todos os tópicos
+            </Link>
+            {session?.user && (
+              <>
+                <Link
+                  href="/?filter=answered-by-me"
+                  className="rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Respondidos por mim
+                </Link>
+                <Link
+                  href="/?filter=viewed-by-me"
+                  className="rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Visualizadas por mim
+                </Link>
+              </>
+            )}
+            <Link
+              href="/?filter=unanswered"
+              className="rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            >
+              Sem respostas
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Estatísticas do Fórum */}
       <Card className="border border-gray-200 bg-white">
         <CardContent className="p-4">

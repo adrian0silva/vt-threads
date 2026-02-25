@@ -1,11 +1,20 @@
 "use client";
 
+import Link from "next/link";
 import { useRef } from "react";
 
 import { PostCard } from "@/components/post-card";
 import { ReplyForm, ReplyFormHandle } from "@/components/reply-form";
-import { Breadcrumb } from "./ui/breadcrumb";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "./ui/breadcrumb";
 import { Clock, User } from "lucide-react";
+
 interface Post {
   id: string;
   author: string;
@@ -19,10 +28,14 @@ interface Post {
   userAvatar: string | null;
   signature?: string | null;
 }
+
 interface ThreadClientProps {
   posts: Post[];
   threadId: string;
-  forum: string;
+  /** Thread slug (used in reply API URL) */
+  threadSlug: string;
+  forumSlug: string;
+  forumTitle: string;
   userId: string;
   isAuthenticated: boolean;
   thread: { title: string; userName: string | null; createdAt: Date };
@@ -60,7 +73,9 @@ function ThreadHeader({
 export function ThreadClient({
   posts,
   threadId,
-  forum,
+  threadSlug,
+  forumSlug,
+  forumTitle,
   userId,
   isAuthenticated,
   thread,
@@ -77,7 +92,33 @@ export function ThreadClient({
             </h1>
           </div>
 
-          <Breadcrumb />
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/">Início</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/forums">Fóruns</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href={`/forums/${forumSlug}`}>{forumTitle}</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="max-w-[200px] truncate sm:max-w-md">
+                  {thread.title}
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
           <ThreadHeader thread={thread} />
         </div>
         <div className="space-y-6">
@@ -109,7 +150,7 @@ export function ThreadClient({
         threadId={threadId}
         userId={userId}
         isAuthenticated={isAuthenticated}
-        forum={forum}
+        forum={threadSlug}
       />
     </>
   );

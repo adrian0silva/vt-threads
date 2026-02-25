@@ -1,17 +1,17 @@
 import { eq, sql } from "drizzle-orm";
-import { ChevronRight, Clock, Eye, MessageSquare, User } from "lucide-react";
+import { Clock, MessageSquare, User } from "lucide-react";
 import { headers } from "next/headers";
 
 import { ThreadClient } from "@/components/ThreadClientProps";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { db } from "@/db";
-import { postTable, threadReadTable, threadTable, userTable } from "@/db/schema";
+import {
+  forumTable,
+  postTable,
+  threadReadTable,
+  threadTable,
+  userTable,
+} from "@/db/schema";
 import { auth } from "@/lib/auth";
-import { parseBBCode } from "@/utils/bbcode-parser";
-import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { PostsPagination } from "@/components/posts-pagination";
 
 const DEFAULT_PER = 50;
@@ -72,8 +72,6 @@ export default async function ThreadPage({ params, searchParams }: ThreadPagePro
 
   const { slug } = await params;
 
-  // Buscar thread
-  // Buscar thread
   const [thread] = await db
     .select({
       id: threadTable.id,
@@ -82,12 +80,16 @@ export default async function ThreadPage({ params, searchParams }: ThreadPagePro
       description: threadTable.description,
       views: threadTable.views,
       userId: threadTable.userId,
+      forumId: threadTable.forumId,
       userName: userTable.name,
       userAvatar: userTable.image,
       createdAt: threadTable.createdAt,
+      forumSlug: forumTable.slug,
+      forumTitle: forumTable.title,
     })
     .from(threadTable)
     .leftJoin(userTable, eq(threadTable.userId, userTable.id))
+    .leftJoin(forumTable, eq(threadTable.forumId, forumTable.id))
     .where(eq(threadTable.slug, slug))
     .limit(1)
     .execute();
@@ -108,6 +110,10 @@ export default async function ThreadPage({ params, searchParams }: ThreadPagePro
         },
       });
   }
+  await db
+    .update(threadTable)
+    .set({ views: sql`${threadTable.views} + 1` })
+    .where(eq(threadTable.id, thread.id));
 
   const search = (await (searchParams ?? Promise.resolve({}))) as {
     page?: string;
@@ -179,11 +185,13 @@ export default async function ThreadPage({ params, searchParams }: ThreadPagePro
   ];
 
   return (
-    <>  
+    <>
     <ThreadClient
       posts={displayPosts}
       threadId={thread.id}
-      forum={slug}
+      threadSlug={slug}
+      forumSlug={thread.forumSlug ?? slug}
+      forumTitle={thread.forumTitle ?? "Fórum"}
       userId={session?.user?.id || ""}
       isAuthenticated={!!session?.user}
       thread={{

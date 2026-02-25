@@ -31,6 +31,7 @@ export async function POST(request: Request) {
         .update(threadTable)
         .set({
           lastPostAt: new Date(),
+          lastPostUserId: userId,
         })
         .where(eq(threadTable.id, threadId));
     });

@@ -1,4 +1,5 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { aliasedTable } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, sql } from "drizzle-orm";
 import { Clock, Eye, MessageSquare, PlusIcon, User } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -6,6 +7,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { ForumSkeleton } from "@/components/forum-skeleton";
+import { ThreadTitleWithPreview } from "@/components/thread-title-with-preview";
 import { ThreadsPagination } from "@/components/threads-pagination";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -22,10 +24,13 @@ import { auth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_PER = 10;
+const lastPostUser = aliasedTable(userTable, "last_post_user");
+
+type FilterType = "all" | "answered-by-me" | "viewed-by-me" | "unanswered";
 
 interface ForumPageProps {
   params: Promise<{ slug: string }>;
-  searchParams?: Promise<{ page?: string; per?: string }>;
+  searchParams?: Promise<{ page?: string; per?: string; filter?: string }>;
 }
 
 async function ForumContent({
@@ -33,7 +38,7 @@ async function ForumContent({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams?: Promise<{ page?: string; per?: string }>;
+  searchParams?: Promise<{ page?: string; per?: string; filter?: string }>;
 }) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -42,12 +47,14 @@ async function ForumContent({
   const search = (await (searchParams ?? Promise.resolve({}))) as {
     page?: string;
     per?: string;
+    filter?: string;
   };
   const page = Math.max(1, parseInt(search?.page ?? "1", 10) || 1);
   const per = Math.min(
     100,
     Math.max(1, parseInt(search?.per ?? String(DEFAULT_PER), 10) || DEFAULT_PER),
   );
+  const filter = (search?.filter as FilterType) || "all";
 
   const forumEncontrado = await db.query.forumTable.findFirst({
     where: eq(forumTable.slug, slug),
@@ -57,15 +64,63 @@ async function ForumContent({
     return notFound();
   }
 
-  const countResult = await db
-    .select({ totalCount: sql<number>`count(*)::int` })
-    .from(threadTable)
-    .where(eq(threadTable.forumId, forumEncontrado.id));
-  const totalCount = countResult[0]?.totalCount ?? 0;
+  const forumWhere = eq(threadTable.forumId, forumEncontrado.id);
+
+  let totalCount: number;
+  if (filter === "unanswered") {
+    const rows = await db
+      .select({ id: threadTable.id })
+      .from(threadTable)
+      .leftJoin(postTable, eq(postTable.threadId, threadTable.id))
+      .where(forumWhere)
+      .groupBy(threadTable.id)
+      .having(sql`COUNT(${postTable.id}) = 0`);
+    totalCount = rows.length;
+  } else if (filter === "answered-by-me" && session?.user?.id) {
+    const rows = await db
+      .selectDistinct({ threadId: postTable.threadId })
+      .from(postTable)
+      .innerJoin(threadTable, eq(postTable.threadId, threadTable.id))
+      .where(and(eq(postTable.userId, session.user.id), forumWhere));
+    totalCount = rows.length;
+  } else if (filter === "viewed-by-me" && session?.user?.id) {
+    const rows = await db
+      .select({ threadId: threadReadTable.threadId })
+      .from(threadReadTable)
+      .innerJoin(threadTable, eq(threadReadTable.threadId, threadTable.id))
+      .where(and(eq(threadReadTable.userId, session.user.id), forumWhere));
+    totalCount = rows.length;
+  } else {
+    const [r] = await db
+      .select({ totalCount: sql<number>`count(*)::int` })
+      .from(threadTable)
+      .where(forumWhere);
+    totalCount = r?.totalCount ?? 0;
+  }
+
   const totalPages = Math.ceil(totalCount / per) || 1;
   const currentPage = Math.min(Math.max(1, page), totalPages);
 
-  const threads = await db
+  let answeredThreadIds: string[] = [];
+  if (filter === "answered-by-me" && session?.user?.id) {
+    const answeredRows = await db
+      .selectDistinct({ threadId: postTable.threadId })
+      .from(postTable)
+      .innerJoin(threadTable, eq(postTable.threadId, threadTable.id))
+      .where(and(eq(postTable.userId, session.user.id), forumWhere));
+    answeredThreadIds = answeredRows.map((r) => r.threadId).filter(Boolean);
+  }
+
+  const filterWhere =
+    filter === "answered-by-me" && session?.user?.id
+      ? answeredThreadIds.length > 0
+        ? and(forumWhere, inArray(threadTable.id, answeredThreadIds))
+        : and(forumWhere, sql`1 = 0`)
+      : filter === "viewed-by-me" && session?.user?.id
+        ? and(forumWhere, isNotNull(threadReadTable.lastReadAt))
+        : forumWhere;
+
+  const baseQuery = db
     .select({
       id: threadTable.id,
       title: threadTable.title,
@@ -77,15 +132,18 @@ async function ForumContent({
       postsCount: sql<number>`COUNT(${postTable.id})`.mapWith(Number),
       lastReadAt: threadReadTable.lastReadAt,
       isUnread: sql<boolean>`
-      ${threadReadTable.lastReadAt} IS NULL
-      OR ${threadReadTable.lastReadAt} < ${threadTable.lastPostAt}
-    `,
+        ${threadReadTable.lastReadAt} IS NULL
+        OR ${threadReadTable.lastReadAt} < ${threadTable.lastPostAt}
+      `,
       userName: userTable.name,
       userAvatar: userTable.image,
+      lastPostUserName: lastPostUser.name,
+      lastPostUserAvatar: lastPostUser.image,
     })
     .from(threadTable)
     .leftJoin(postTable, eq(postTable.threadId, threadTable.id))
     .leftJoin(userTable, eq(threadTable.userId, userTable.id))
+    .leftJoin(lastPostUser, eq(threadTable.lastPostUserId, lastPostUser.id))
     .leftJoin(
       threadReadTable,
       and(
@@ -93,17 +151,28 @@ async function ForumContent({
         eq(threadReadTable.userId, session?.user?.id || ""),
       ),
     )
-    .where(eq(threadTable.forumId, forumEncontrado.id))
-    .groupBy(
-      threadTable.id,
-      threadTable.title,
-      threadReadTable.lastReadAt,
-      threadTable.slug,
-      threadTable.description,
-      threadTable.views,
-      userTable.name,
-      userTable.image,
-    )
+    .where(filterWhere);
+
+  const withGroupBy = baseQuery.groupBy(
+    threadTable.id,
+    threadTable.title,
+    threadReadTable.lastReadAt,
+    threadTable.slug,
+    threadTable.description,
+    threadTable.views,
+    threadTable.lastPostAt,
+    userTable.name,
+    userTable.image,
+    lastPostUser.name,
+    lastPostUser.image,
+  );
+
+  const withHaving =
+    filter === "unanswered"
+      ? withGroupBy.having(sql`COUNT(${postTable.id}) = 0`)
+      : withGroupBy;
+
+  const threads = await withHaving
     .orderBy(desc(threadTable.lastPostAt))
     .limit(per)
     .offset((currentPage - 1) * per);
@@ -128,7 +197,11 @@ async function ForumContent({
               <div className="flex items-center gap-1">
                 <MessageSquare className="h-4 w-4" />
                 <span>
-                  {threads.reduce((sum, t) => sum + t.postsCount, 0)} Mensagens
+                  {threads.reduce(
+                    (sum: number, t: { postsCount: number }) => sum + t.postsCount,
+                    0,
+                  )}{" "}
+                  Mensagens
                 </span>
               </div>
             </div>
@@ -145,6 +218,58 @@ async function ForumContent({
             </Link>
           )}
         </div>
+      </div>
+
+      {/* Filtros */}
+      <div className="mb-4 flex flex-wrap gap-2">
+        <Link
+          href={`/forums/${slug}` as never}
+          className={cn(
+            "rounded-md px-3 py-1.5 text-sm font-medium",
+            filter === "all"
+              ? "bg-gray-800 text-white"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+          )}
+        >
+          Todos
+        </Link>
+        {session?.user && (
+          <>
+            <Link
+              href={`/forums/${slug}?filter=answered-by-me` as never}
+              className={cn(
+                "rounded-md px-3 py-1.5 text-sm font-medium",
+                filter === "answered-by-me"
+                  ? "bg-gray-800 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+              )}
+            >
+              Respondidos por mim
+            </Link>
+            <Link
+              href={`/forums/${slug}?filter=viewed-by-me` as never}
+              className={cn(
+                "rounded-md px-3 py-1.5 text-sm font-medium",
+                filter === "viewed-by-me"
+                  ? "bg-gray-800 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+              )}
+            >
+              Visualizadas por mim
+            </Link>
+          </>
+        )}
+        <Link
+          href={`/forums/${slug}?filter=unanswered` as never}
+          className={cn(
+            "rounded-md px-3 py-1.5 text-sm font-medium",
+            filter === "unanswered"
+              ? "bg-gray-800 text-white"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+          )}
+        >
+          Sem respostas
+        </Link>
       </div>
 
       {/* Threads List */}
@@ -165,7 +290,7 @@ async function ForumContent({
         </div>
       ) : (
         <div className="space-y-4">
-          {threads.map((thread) => (
+          {threads.map((thread: (typeof threads)[number]) => (
             <Card
               key={thread.id}
               className="border-black-200 hover:border-black-300 border bg-white transition-all duration-300 hover:shadow-md"
@@ -196,18 +321,12 @@ async function ForumContent({
                   {/* Conteúdo principal */}
                   <div className="min-w-0 flex-1">
                     <div className="mb-2">
-                      <Link href={`/threads/${thread.slug}`}>
-                        <h3
-                          className={cn(
-                            "text-black-900 mb-1 line-clamp-2 text-base font-bold transition-colors hover:text-blue-600 hover:underline sm:text-lg",
-                            thread.isUnread
-                              ? "font-bold text-black"
-                              : "font-normal text-gray-600",
-                          )}
-                        >
-                          {thread.title}
-                        </h3>
-                      </Link>
+                      <ThreadTitleWithPreview
+                        title={thread.title}
+                        description={thread.description}
+                        slug={thread.slug}
+                        isUnread={thread.isUnread}
+                      />
                     </div>
                     <div className="text-black-500 flex flex-col gap-2 text-xs sm:flex-row sm:items-center sm:gap-3">
                       <div className="hidden items-center gap-1 sm:flex">
@@ -222,6 +341,21 @@ async function ForumContent({
                           {new Date(thread.createdAt).toLocaleDateString()}
                         </span>
                       </div>
+                      {thread.postsCount > 0 && thread.lastPostAt && (
+                        <div className="flex items-center gap-1">
+                          <MessageSquare className="h-3 w-3" />
+                          <span>
+                            Última resposta
+                            {thread.lastPostUserName
+                              ? ` por ${thread.lastPostUserName}`
+                              : ""}{" "}
+                            em{" "}
+                            {new Date(thread.lastPostAt).toLocaleDateString(
+                              "pt-BR",
+                            )}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -257,6 +391,7 @@ async function ForumContent({
             totalItems={totalCount}
             per={per}
             basePath={`/forums/${slug}`}
+            queryParams={filter !== "all" ? { filter } : undefined}
           />
         </div>
       )}

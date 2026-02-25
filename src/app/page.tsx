@@ -1,5 +1,6 @@
-import { and, desc, eq, sql } from "drizzle-orm";
-import { Clock, MessageSquare, PlusIcon, User } from "lucide-react";
+import { aliasedTable } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, sql } from "drizzle-orm";
+import { Clock, MessageSquare, User } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -7,6 +8,7 @@ import { Suspense } from "react";
 import { CreateThread } from "@/components/create-thread";
 import { HomeSkeleton } from "@/components/home-skeleton";
 import { RightRail } from "@/components/right-rail";
+import { ThreadTitleWithPreview } from "@/components/thread-title-with-preview";
 import { ThreadsPagination } from "@/components/threads-pagination";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
@@ -18,15 +20,19 @@ import {
   userTable,
 } from "@/db/schema";
 import { auth } from "@/lib/auth";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_PER = 20;
+const lastPostUser = aliasedTable(userTable, "last_post_user");
+/** Sentinel for leftJoin when no session - never matches any user */
+const NO_SESSION_USER_ID = "__no_session__";
+
+type FilterType = "all" | "answered-by-me" | "viewed-by-me" | "unanswered";
 
 async function HomeContent({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; per?: string }>;
+  searchParams: Promise<{ page?: string; per?: string; filter?: string }>;
 }) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -34,17 +40,51 @@ async function HomeContent({
   const params = await searchParams;
   const page = Math.max(1, parseInt(params?.page ?? "1", 10) || 1);
   const per = Math.min(100, Math.max(1, parseInt(params?.per ?? String(DEFAULT_PER), 10) || DEFAULT_PER));
+  const filter = (params?.filter as FilterType) || "all";
 
   const forums = await db.query.forumTable.findMany({});
 
-  const countResult = await db
-    .select({ totalCount: sql<number>`count(*)::int` })
-    .from(threadTable);
-  const totalCount = countResult[0]?.totalCount ?? 0;
+  let totalCount: number;
+  if (filter === "unanswered") {
+    const rows = await db
+      .select({ id: threadTable.id })
+      .from(threadTable)
+      .leftJoin(postTable, eq(postTable.threadId, threadTable.id))
+      .groupBy(threadTable.id)
+      .having(sql`COUNT(${postTable.id}) = 0`);
+    totalCount = rows.length;
+  } else if (filter === "answered-by-me" && session?.user?.id) {
+    const rows = await db
+      .selectDistinct({ threadId: postTable.threadId })
+      .from(postTable)
+      .where(eq(postTable.userId, session.user.id));
+    totalCount = rows.length;
+  } else if (filter === "viewed-by-me" && session?.user?.id) {
+    const [r] = await db
+      .select({ totalCount: sql<number>`count(*)::int` })
+      .from(threadReadTable)
+      .where(eq(threadReadTable.userId, session.user.id));
+    totalCount = r?.totalCount ?? 0;
+  } else {
+    const [r] = await db
+      .select({ totalCount: sql<number>`count(*)::int` })
+      .from(threadTable);
+    totalCount = r?.totalCount ?? 0;
+  }
+
   const totalPages = Math.ceil(totalCount / per) || 1;
   const currentPage = Math.min(Math.max(1, page), totalPages);
 
-  const threads = await db
+  let answeredThreadIds: string[] = [];
+  if (filter === "answered-by-me" && session?.user?.id) {
+    const answeredRows = await db
+      .selectDistinct({ threadId: postTable.threadId })
+      .from(postTable)
+      .where(eq(postTable.userId, session.user.id));
+    answeredThreadIds = answeredRows.map((r) => r.threadId).filter(Boolean);
+  }
+
+  const baseQuery = db
     .select({
       id: threadTable.id,
       title: threadTable.title,
@@ -61,36 +101,113 @@ async function HomeContent({
       `,
       userName: userTable.name,
       userAvatar: userTable.image,
+      lastPostUserName: lastPostUser.name,
+      lastPostUserAvatar: lastPostUser.image,
     })
     .from(threadTable)
     .leftJoin(postTable, eq(postTable.threadId, threadTable.id))
     .leftJoin(userTable, eq(threadTable.userId, userTable.id))
+    .leftJoin(lastPostUser, eq(threadTable.lastPostUserId, lastPostUser.id))
     .leftJoin(
       threadReadTable,
       and(
         eq(threadReadTable.threadId, threadTable.id),
-        eq(threadReadTable.userId, session?.user?.id || ""),
+        eq(threadReadTable.userId, session?.user?.id ?? NO_SESSION_USER_ID),
       ),
-    )
-    .groupBy(
-      threadTable.id,
-      threadTable.title,
-      threadReadTable.lastReadAt,
-      threadTable.slug,
-      threadTable.description,
-      threadTable.views,
-      userTable.name,
-      userTable.image,
-    )
+    );
+
+  const withWhere =
+    filter === "answered-by-me" && session?.user?.id
+      ? answeredThreadIds.length > 0
+        ? baseQuery.where(inArray(threadTable.id, answeredThreadIds))
+        : baseQuery.where(sql`1 = 0`)
+      : filter === "viewed-by-me" && session?.user?.id
+        ? baseQuery.where(isNotNull(threadReadTable.lastReadAt))
+        : baseQuery;
+
+  const withGroupBy = withWhere.groupBy(
+    threadTable.id,
+    threadTable.title,
+    threadReadTable.lastReadAt,
+    threadTable.slug,
+    threadTable.description,
+    threadTable.views,
+    threadTable.lastPostAt,
+    userTable.name,
+    userTable.image,
+    lastPostUser.name,
+    lastPostUser.image,
+  );
+
+  const withHaving = filter === "unanswered"
+    ? withGroupBy.having(sql`COUNT(${postTable.id}) = 0`)
+    : withGroupBy;
+
+  const threads = await withHaving
     .orderBy(desc(threadTable.lastPostAt))
     .limit(per)
     .offset((currentPage - 1) * per);
+
+  const basePath = "/";
+  const filterParams = (f: string) => (f === "all" ? basePath : `${basePath}?filter=${f}`);
 
   return (
     <>
       {/* Navigation */}
       <div className="mb-6">
         {session?.user && <CreateThread forums={forums} />}
+      </div>
+
+      {/* Filtros */}
+      <div className="mb-4 flex flex-wrap gap-2">
+        <Link
+          href={filterParams("all") as never}
+          className={cn(
+            "rounded-md px-3 py-1.5 text-sm font-medium",
+            filter === "all"
+              ? "bg-gray-800 text-white"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+          )}
+        >
+          Todos
+        </Link>
+        {session?.user && (
+          <>
+            <Link
+              href={`${basePath}?filter=answered-by-me`}
+              className={cn(
+                "rounded-md px-3 py-1.5 text-sm font-medium",
+                filter === "answered-by-me"
+                  ? "bg-gray-800 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+              )}
+            >
+              Respondidos por mim
+            </Link>
+            <Link
+              href={`${basePath}?filter=viewed-by-me`}
+              className={cn(
+                "rounded-md px-3 py-1.5 text-sm font-medium",
+                filter === "viewed-by-me"
+                  ? "bg-gray-800 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+              )}
+            >
+              Visualizadas por mim
+            </Link>
+          </>
+        )}
+        <Link
+          href={`${basePath}?filter=unanswered`}
+          className={cn(
+            "rounded-md px-3 py-1.5 text-sm font-medium",
+            filter === "unanswered"
+              ? "bg-gray-800 text-white"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+          )}
+        >
+          Sem respostas
+        </Link>
       </div>
 
       <div className="flex flex-col gap-8 lg:flex-row">
@@ -143,18 +260,12 @@ async function HomeContent({
                     {/* Conteúdo principal */}
                     <div className="min-w-0 flex-1">
                       <div className="mb-2">
-                        <Link href={`/threads/${thread.slug}`}>
-                          <h3
-                            className={cn(
-                              "text-black-900 mb-1 line-clamp-2 text-base font-bold transition-colors hover:text-blue-600 hover:underline sm:text-lg",
-                              thread.isUnread
-                                ? "font-bold text-black"
-                                : "font-normal text-gray-600",
-                            )}
-                          >
-                            {thread.title}
-                          </h3>
-                        </Link>
+                        <ThreadTitleWithPreview
+                          title={thread.title}
+                          description={thread.description}
+                          slug={thread.slug}
+                          isUnread={thread.isUnread}
+                        />
                       </div>
                       <div className="flex flex-col gap-2 text-xs text-gray-500 sm:flex-row sm:items-center sm:gap-3">
                         <div className="hidden items-center gap-1 sm:flex">
@@ -171,6 +282,21 @@ async function HomeContent({
                             )}
                           </span>
                         </div>
+                        {thread.postsCount > 0 && thread.lastPostAt && (
+                          <div className="flex items-center gap-1">
+                            <MessageSquare className="h-3 w-3" />
+                            <span>
+                              Última resposta
+                              {thread.lastPostUserName
+                                ? ` por ${thread.lastPostUserName}`
+                                : ""}{" "}
+                              em{" "}
+                              {new Date(thread.lastPostAt).toLocaleDateString(
+                                "pt-BR",
+                              )}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -197,6 +323,7 @@ async function HomeContent({
               totalItems={totalCount}
               per={per}
               basePath="/"
+              queryParams={filter !== "all" ? { filter } : undefined}
             />
           </div>
         )}

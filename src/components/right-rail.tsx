@@ -3,10 +3,13 @@ import { Eye, MessageSquare, Users } from "lucide-react";
 import { OnlineStats } from "@/components/online/OnlineStats";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { getTotalUsers } from "@/lib/stats";
+import { getTotalForums, getTotalPosts, getTotalTopics, getTotalUsers } from "@/lib/stats";
 
 export async function RightRail() {
   const totalUsers = await getTotalUsers();
+  const totalForums = await getTotalForums();
+  const totalTopics = await getTotalTopics();
+  const totalPosts = await getTotalPosts();
   return (
     <div className="flex w-full flex-col gap-4 lg:w-80">
       {/* Estatísticas do Fórum */}
@@ -42,23 +45,24 @@ export async function RightRail() {
             <div className="flex justify-between">
               <dt className="flex items-center gap-1 text-gray-600">
                 <MessageSquare className="h-4 w-4" />
-                Tópicos:
+                Foruns:
               </dt>
-              <dd className="font-bold text-gray-800">533,625</dd>
+              <dd className="font-bold text-gray-800">{totalForums.toLocaleString("pt-BR")}</dd>
             </div>
             <div className="flex justify-between">
               <dt className="flex items-center gap-1 text-gray-600">
                 <MessageSquare className="h-4 w-4" />
-                Mensagens:
+
+                Topicos:
               </dt>
-              <dd className="font-bold text-gray-800">68,203,114</dd>
+              <dd className="font-bold text-gray-800">{totalTopics.toLocaleString("pt-BR")}</dd>
             </div>
             <div className="flex justify-between">
               <dt className="flex items-center gap-1 text-gray-600">
                 <Users className="h-4 w-4" />
-                Membros:
+                Posts:
               </dt>
-              <dd className="font-bold text-gray-800">62,471</dd>
+              <dd className="font-bold text-gray-800">{totalPosts.toLocaleString("pt-BR")}</dd>
             </div>
           </dl>
         </CardContent>

@@ -76,6 +76,9 @@ export const threadTable = pgTable("thread", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
   lastPostAt: timestamp("last_post_at").notNull().defaultNow(),
+  lastPostUserId: text("last_post_user_id").references(() => userTable.id, {
+    onDelete: "set null",
+  }),
 });
 
 export const threadReadTable = pgTable(

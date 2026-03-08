@@ -1,9 +1,7 @@
 "use client";
 
 import {
-  Apple,
-  BookOpen,
-  Crown,
+  ChevronDown,
   Flame,
   Gamepad2,
   Home,
@@ -12,25 +10,27 @@ import {
   Newspaper,
   Settings,
   Sparkles,
-  Ticket,
   TvIcon,
-  Zap,
 } from "lucide-react";
 
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarInput,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarRail,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
 
 const mainNav = [
@@ -43,7 +43,6 @@ const mainNav = [
     url: "/forums/vale-tudo",
   },
   { title: "Em Alta", icon: Flame, url: "#" },
-  { title: "Notícias", icon: Newspaper, url: "#" },
 ];
 
 export function ForumSidebar(props: React.ComponentProps<typeof Sidebar>) {
@@ -63,6 +62,35 @@ export function ForumSidebar(props: React.ComponentProps<typeof Sidebar>) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              <SidebarMenuItem>
+                <Collapsible defaultOpen className="group/topicos">
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton>
+                      <MessageSquare />
+                      <span>Tópicos</span>
+                      <ChevronDown className="ml-auto size-4 transition-transform group-data-[state=open]/topicos:rotate-180" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <a href="/?filter=answered-by-me">
+                            Respondidos por mim
+                          </a>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <a href="/?filter=viewed-by-me">
+                            Visualizadas por mim
+                          </a>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

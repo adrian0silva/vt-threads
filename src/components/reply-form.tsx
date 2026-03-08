@@ -167,18 +167,15 @@ export const ReplyForm = forwardRef<ReplyFormHandle, ReplyFormProps>(
               Participe da Discussão!
             </h3>
           </div>
-          <p className="mb-4 text-gray-700">
+          <p className="mb-4 text-foreground">
             Você precisa fazer login ou se registrar para responder a este
             tópico.
           </p>
           <div className="flex items-center justify-center space-x-3">
-            <Button
-              variant="outline"
-              className="border-gray-300 text-gray-700 hover:bg-gray-100"
-            >
+            <Button variant="outline">
               Entrar
             </Button>
-            <Button className="bg-blue-600 text-white hover:bg-blue-700">
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
               Registrar
             </Button>
           </div>
@@ -216,10 +213,10 @@ export const ReplyForm = forwardRef<ReplyFormHandle, ReplyFormProps>(
       }, 0);
     };
     return (
-      <Card className="w-full border border-gray-200 bg-white">
+      <Card className="border-border bg-card w-full border">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3">
-            <CardTitle className="text-lg font-bold text-gray-900">
+            <CardTitle className="text-foreground text-lg font-bold">
               Criar Resposta
             </CardTitle>
           </div>
@@ -229,7 +226,7 @@ export const ReplyForm = forwardRef<ReplyFormHandle, ReplyFormProps>(
             <div className="mb-2 flex items-center justify-between">
               <label
                 htmlFor="post-content"
-                className="text-sm font-medium text-gray-700"
+                className="text-foreground text-sm font-medium"
               >
                 Conteúdo
               </label>
@@ -237,7 +234,7 @@ export const ReplyForm = forwardRef<ReplyFormHandle, ReplyFormProps>(
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowHelp(!showHelp)}
-                className="gap-1 text-xs text-gray-600 hover:text-gray-800"
+                className="text-muted-foreground hover:text-foreground gap-1 text-xs"
               >
                 <HelpCircle className="h-3 w-3" />
                 BBCode
@@ -287,7 +284,7 @@ export const ReplyForm = forwardRef<ReplyFormHandle, ReplyFormProps>(
               placeholder="Escreva sua resposta aqui... Use [img]URL[/img] para imagens, [youtube]ID[/youtube] para vídeos do YouTube, [twitter]URL[/twitter] para tweets"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="min-h-[150px] resize-none border-gray-200 font-mono text-sm focus:border-gray-400"
+              className="border-input min-h-[150px] resize-none font-mono text-sm focus:border-ring"
             />
           </div>
           <div className="flex flex-wrap gap-2">
@@ -295,7 +292,7 @@ export const ReplyForm = forwardRef<ReplyFormHandle, ReplyFormProps>(
               variant="outline"
               size="sm"
               onClick={() => insertBBCode("img", "URL_DA_IMAGEM")}
-              className="border-gray-300 text-xs text-gray-700 hover:bg-gray-50"
+              className="text-xs"
             >
               🖼️ + Imagem
             </Button>
@@ -303,7 +300,7 @@ export const ReplyForm = forwardRef<ReplyFormHandle, ReplyFormProps>(
               variant="outline"
               size="sm"
               onClick={() => insertBBCode("youtube", "ID_OU_URL_YOUTUBE")}
-              className="border-gray-300 text-xs text-gray-700 hover:bg-gray-50"
+              className="text-xs"
             >
               📺 + Vídeo
             </Button>
@@ -311,7 +308,7 @@ export const ReplyForm = forwardRef<ReplyFormHandle, ReplyFormProps>(
               variant="outline"
               size="sm"
               onClick={() => insertBBCode("twitter", "URL_DO_TWEET")}
-              className="border-gray-300 text-xs text-gray-700 hover:bg-gray-50"
+              className="text-xs"
             >
               🐦 + Tweet
             </Button>
@@ -320,7 +317,7 @@ export const ReplyForm = forwardRef<ReplyFormHandle, ReplyFormProps>(
             <Button
               onClick={handleSubmit}
               disabled={!hasContent || isSubmitting}
-              className="gap-2 bg-blue-600 text-white hover:bg-blue-700"
+              className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
             >
               <Send className="h-4 w-4" />
               {isSubmitting ? "Enviando..." : "Enviar Resposta"}

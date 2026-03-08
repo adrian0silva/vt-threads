@@ -9,14 +9,22 @@ interface ThreadsPaginationProps {
   totalItems: number;
   per: number;
   basePath: string;
+  /** Optional query params to preserve (e.g. filter) */
+  queryParams?: Record<string, string>;
 }
 
-function buildPageUrl(basePath: string, page: number, per: number): string {
-  const params = new URLSearchParams();
+function buildPageUrl(
+  basePath: string,
+  page: number,
+  per: number,
+  queryParams?: Record<string, string>,
+): string {
+  const params = new URLSearchParams(queryParams);
   if (page > 1) params.set("page", String(page));
   if (per !== 20) params.set("per", String(per));
   const q = params.toString();
-  return q ? `${basePath}?${q}` : basePath;
+  const sep = basePath.includes("?") ? "&" : "?";
+  return q ? `${basePath}${sep}${q}` : basePath;
 }
 
 export function ThreadsPagination({
@@ -25,15 +33,16 @@ export function ThreadsPagination({
   totalItems,
   per,
   basePath,
+  queryParams,
 }: ThreadsPaginationProps) {
   if (totalItems === 0) return null;
 
   const start = (currentPage - 1) * per + 1;
   const end = Math.min(currentPage * per, totalItems);
 
-  const prevUrl = currentPage > 1 ? buildPageUrl(basePath, currentPage - 1, per) : null;
-  const nextUrl =
-    currentPage < totalPages ? buildPageUrl(basePath, currentPage + 1, per) : null;
+  const build = (page: number) => buildPageUrl(basePath, page, per, queryParams);
+  const prevUrl = currentPage > 1 ? build(currentPage - 1) : null;
+  const nextUrl = currentPage < totalPages ? build(currentPage + 1) : null;
 
   const showPages = 5;
   let pageStart = Math.max(1, currentPage - Math.floor(showPages / 2));
@@ -72,7 +81,7 @@ export function ThreadsPagination({
           {pageStart > 1 && (
             <>
               <Button variant="outline" size="icon" className="h-8 w-8" asChild>
-                <Link href={buildPageUrl(basePath, 1, per) as never}>1</Link>
+                <Link href={build(1) as never}>1</Link>
               </Button>
               {pageStart > 2 && <span className="px-1 text-gray-400">…</span>}
             </>
@@ -96,7 +105,7 @@ export function ThreadsPagination({
                 className="h-8 w-8"
                 asChild
               >
-                <Link href={buildPageUrl(basePath, n, per) as never}>{n}</Link>
+                <Link href={build(n) as never}>{n}</Link>
               </Button>
             ),
           )}
@@ -111,7 +120,7 @@ export function ThreadsPagination({
                 className="h-8 w-8"
                 asChild
               >
-                <Link href={buildPageUrl(basePath, totalPages, per) as never}>
+                <Link href={build(totalPages) as never}>
                   {totalPages}
                 </Link>
               </Button>

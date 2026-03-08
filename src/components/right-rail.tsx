@@ -1,18 +1,14 @@
-import { Eye, MessageSquare, Users } from "lucide-react";
+import { MessageSquare, Users } from "lucide-react";
 import Link from "next/link";
 
-import { OnlineStats } from "@/components/online/OnlineStats";
-import { Badge } from "@/components/ui/badge";
+import { OnlineStats } from "@/components/online/online-stats";
 import { Card, CardContent } from "@/components/ui/card";
-import { getTotalForums, getTotalPosts, getTotalTopics, getTotalUsers } from "@/lib/stats";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import * as statsService from "@/services/stats.service";
 
 export async function RightRail() {
-  const totalUsers = await getTotalUsers();
-  const totalForums = await getTotalForums();
-  const totalTopics = await getTotalTopics();
-  const totalPosts = await getTotalPosts();
+  const totals = await statsService.getTotals();
   const session = await auth.api.getSession({ headers: await headers() });
 
   return (
@@ -69,7 +65,7 @@ export async function RightRail() {
                 Total de Membros:
               </dt>
               <dd className="font-bold text-foreground">
-                {totalUsers.toLocaleString("pt-BR")}
+                {totals.users.toLocaleString("pt-BR")}
               </dd>
             </div>
           </dl>
@@ -89,21 +85,21 @@ export async function RightRail() {
                 <MessageSquare className="h-4 w-4" />
                 Foruns:
               </dt>
-              <dd className="font-bold text-foreground">{totalForums.toLocaleString("pt-BR")}</dd>
+              <dd className="font-bold text-foreground">{totals.forums.toLocaleString("pt-BR")}</dd>
             </div>
             <div className="flex justify-between">
               <dt className="text-muted-foreground flex items-center gap-1">
                 <MessageSquare className="h-4 w-4" />
                 Topicos:
               </dt>
-              <dd className="font-bold text-foreground">{totalTopics.toLocaleString("pt-BR")}</dd>
+              <dd className="font-bold text-foreground">{totals.topics.toLocaleString("pt-BR")}</dd>
             </div>
             <div className="flex justify-between">
               <dt className="text-muted-foreground flex items-center gap-1">
                 <Users className="h-4 w-4" />
                 Posts:
               </dt>
-              <dd className="font-bold text-foreground">{totalPosts.toLocaleString("pt-BR")}</dd>
+              <dd className="font-bold text-foreground">{totals.posts.toLocaleString("pt-BR")}</dd>
             </div>
           </dl>
         </CardContent>

@@ -12,34 +12,9 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "./ui/breadcrumb";
+} from "@/components/ui/breadcrumb";
 import { Clock, User } from "lucide-react";
-
-interface Post {
-  id: string;
-  author: string;
-  title: string;
-  joinDate: string;
-  posts: string;
-  likes: string;
-  content: string;
-  timestamp: string;
-  isOriginalPoster: boolean;
-  userAvatar: string | null;
-  signature?: string | null;
-}
-
-interface ThreadClientProps {
-  posts: Post[];
-  threadId: string;
-  /** Thread slug (used in reply API URL) */
-  threadSlug: string;
-  forumSlug: string;
-  forumTitle: string;
-  userId: string;
-  isAuthenticated: boolean;
-  thread: { title: string; userName: string | null; createdAt: Date };
-}
+import type { ThreadClientProps as ThreadClientPropsType } from "@/types/thread";
 
 function ThreadHeader({
   thread,
@@ -79,7 +54,7 @@ export function ThreadClient({
   userId,
   isAuthenticated,
   thread,
-}: ThreadClientProps) {
+}: ThreadClientPropsType) {
   const replyFormRef = useRef<ReplyFormHandle | null>(null);
 
   return (
@@ -127,15 +102,15 @@ export function ThreadClient({
               key={post.id}
               post={{
                 id: post.id,
-                author: post.author as string,
+                author: post.author,
                 title: post.title,
                 joinDate: post.joinDate,
                 posts: post.posts,
                 likes: post.likes,
-                content: post.content as string,
-                timestamp: post.timestamp as string,
+                content: post.content,
+                timestamp: post.timestamp,
                 userAvatar: post.userAvatar ?? null,
-                isOriginalPoster: post.isOriginalPoster as boolean,
+                isOriginalPoster: post.isOriginalPoster,
               }}
               onReply={(user, content) =>
                 replyFormRef.current?.replyTo(user, content)

@@ -1,17 +1,7 @@
 import { z } from "zod";
 
-import { db } from "@/db";
-import { threadTable } from "@/db/schema";
-import { auth } from "@/lib/auth"
-
-function generateSlug(name: string): string {
-    const randomString = Math.random().toString(36).substring(2, 7);
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .trim() + `-${randomString}`;
-}
+import { auth } from "@/lib/auth";
+import * as threadService from "@/services/thread.service";
 
 const createThreadSchema = z.object({
   title: z.string().min(1),
@@ -20,40 +10,47 @@ const createThreadSchema = z.object({
 });
 
 export async function POST(req: Request) {
-  const session = await auth.api.getSession(  {headers: await import("next/headers").then((mod) => mod.headers()),});
+  const session = await auth.api.getSession({
+    headers: await import("next/headers").then((mod) => mod.headers()),
+  });
 
   if (!session?.user) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+    });
   }
 
   const body = await req.json();
   const validation = createThreadSchema.safeParse(body);
 
   if (!validation.success) {
-    return new Response(JSON.stringify({ error: validation.error.message }), { status: 400 });
+    return new Response(JSON.stringify({ error: validation.error.message }), {
+      status: 400,
+    });
   }
 
   const { title, description, forumId } = validation.data;
 
-  const thread = await db.insert(threadTable).values({
+  const thread = await threadService.createThread({
     title,
-    slug: generateSlug(title),
     description,
     forumId,
     userId: session.user.id,
   });
 
-  return new Response(JSON.stringify(thread));
+  return new Response(JSON.stringify(thread), {
+    headers: { "Content-Type": "application/json" },
+  });
 }
 
-export async function GET(req: Request) {
-  
-
-  const threads = await db.query.threadTable.findMany()
-
-  if (!threads) {
-    return new Response(JSON.stringify({ error: "Threads not found" }), { status: 404 })
-  }
-
-  return new Response(JSON.stringify(threads))
+export async function GET() {
+  const result = await threadService.listThreads({
+    filter: "all",
+    page: 1,
+    per: 100,
+    sessionUserId: null,
+  });
+  return new Response(JSON.stringify(result.threads), {
+    headers: { "Content-Type": "application/json" },
+  });
 }

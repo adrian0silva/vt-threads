@@ -4,23 +4,12 @@ import { ChevronRight, Clock, Eye, MessageSquare, User } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import type { Post } from "@/types/post";
 import { parseBBCode } from "@/utils/bbcode-parser";
 
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
-interface Post {
-  id: string;
-  author: string;
-  title: string;
-  joinDate: string;
-  posts: string;
-  likes: string;
-  content: string;
-  timestamp: string;
-  isOriginalPoster: boolean;
-  userAvatar: string | null;
-  signature?: string | null;
-}
+
 interface BBCodeElement {
   type: string;
   content: string;

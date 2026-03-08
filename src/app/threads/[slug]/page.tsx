@@ -41,7 +41,7 @@ function ThreadHeader({
   thread: { title: string; userName: string | null; createdAt: Date };
 }) {
   return (
-    <div className="mb-6 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white shadow-lg md:p-6">
+    <div className="chaos-card bg-primary text-primary-foreground mb-6 p-4 md:p-6">
       <h1 className="mb-4 text-xl font-bold break-words md:text-3xl">
         {thread.title}
       </h1>

@@ -180,13 +180,13 @@ async function ForumContent({
   return (
     <>
       {/* Forum Header */}
-      <div className="rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white shadow-lg sm:p-6">
+      <div className="chaos-card bg-primary text-primary-foreground p-4 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="mb-2 text-2xl font-bold sm:text-3xl">
               {forumEncontrado.title}
             </h1>
-            <p className="text-sm text-purple-100 sm:text-base">
+            <p className="text-primary-foreground/90 text-sm sm:text-base">
               {forumEncontrado.description}
             </p>
             <div className="mt-3 flex flex-col gap-2 text-xs sm:flex-row sm:items-center sm:gap-4 sm:text-sm">
@@ -209,7 +209,7 @@ async function ForumContent({
           {session?.user && (
             <Link href={`/forums/${slug}/post-thread`}>
               <Button
-                className="bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 font-medium text-white shadow-lg hover:from-orange-600 hover:to-red-600 sm:px-6 sm:py-3"
+                className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 px-4 py-2 font-medium shadow-lg sm:px-6 sm:py-3"
                 size="lg"
               >
                 <PlusIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
@@ -220,15 +220,15 @@ async function ForumContent({
         </div>
       </div>
 
-      {/* Filtros */}
+      {/* Filtros — Principia */}
       <div className="mb-4 flex flex-wrap gap-2">
         <Link
           href={`/forums/${slug}` as never}
           className={cn(
-            "rounded-md px-3 py-1.5 text-sm font-medium",
+            "border-2 border-foreground px-3 py-1.5 text-sm font-medium transition-colors",
             filter === "all"
-              ? "bg-gray-800 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+              ? "bg-foreground text-background"
+              : "bg-card text-foreground hover:bg-muted",
           )}
         >
           Todos
@@ -238,10 +238,10 @@ async function ForumContent({
             <Link
               href={`/forums/${slug}?filter=answered-by-me` as never}
               className={cn(
-                "rounded-md px-3 py-1.5 text-sm font-medium",
+                "border-2 border-foreground px-3 py-1.5 text-sm font-medium transition-colors",
                 filter === "answered-by-me"
-                  ? "bg-gray-800 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+                  ? "bg-foreground text-background"
+                  : "bg-card text-foreground hover:bg-muted",
               )}
             >
               Respondidos por mim
@@ -249,10 +249,10 @@ async function ForumContent({
             <Link
               href={`/forums/${slug}?filter=viewed-by-me` as never}
               className={cn(
-                "rounded-md px-3 py-1.5 text-sm font-medium",
+                "border-2 border-foreground px-3 py-1.5 text-sm font-medium transition-colors",
                 filter === "viewed-by-me"
-                  ? "bg-gray-800 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+                  ? "bg-foreground text-background"
+                  : "bg-card text-foreground hover:bg-muted",
               )}
             >
               Visualizadas por mim
@@ -262,29 +262,29 @@ async function ForumContent({
         <Link
           href={`/forums/${slug}?filter=unanswered` as never}
           className={cn(
-            "rounded-md px-3 py-1.5 text-sm font-medium",
+            "border-2 border-foreground px-3 py-1.5 text-sm font-medium transition-colors",
             filter === "unanswered"
-              ? "bg-gray-800 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+              ? "bg-foreground text-background"
+              : "bg-card text-foreground hover:bg-muted",
           )}
         >
           Sem respostas
         </Link>
       </div>
 
-      {/* Threads List */}
+      {/* Threads List — Principia */}
       {threads.length === 0 ? (
-        <div className="border-black-200 bg-black-50 rounded-lg border py-12 text-center">
+        <div className="bg-muted/50 border-border rounded-lg border py-12 text-center">
           <div className="mb-4">
-            <MessageSquare className="text-black-400 mx-auto h-16 w-16" />
+            <MessageSquare className="text-muted-foreground mx-auto h-16 w-16" />
           </div>
-          <h3 className="text-black-700 mb-2 text-xl font-bold">
+          <h3 className="text-foreground mb-2 text-xl font-bold">
             Ainda não há tópicos
           </h3>
-          <p className="text-black-600 mb-4">
+          <p className="text-muted-foreground mb-4">
             Este fórum aguarda seu primeiro tópico de discussão!
           </p>
-          <p className="text-black-500 text-sm">
+          <p className="text-muted-foreground text-sm">
             Seja o primeiro a iniciar uma discussão.
           </p>
         </div>
@@ -293,25 +293,25 @@ async function ForumContent({
           {threads.map((thread: (typeof threads)[number]) => (
             <Card
               key={thread.id}
-              className="border-black-200 hover:border-black-300 border bg-white transition-all duration-300 hover:shadow-md"
+              className="chaos-card bg-card border-border transition-all duration-300 hover:shadow-lg border"
             >
               <div className="p-4 sm:p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                   {/* Avatar do autor */}
                   <div className="flex items-center gap-3 sm:flex-col sm:items-center">
-                    <Avatar className="border-black-200 h-10 w-10 flex-shrink-0 rounded-none border sm:h-12 sm:w-12">
+                    <Avatar className="border-border h-10 w-10 flex-shrink-0 rounded-none border sm:h-12 sm:w-12">
                       <AvatarImage
                         src={thread.userAvatar || "/placeholder.svg"}
                         alt={thread.userName || "Usuário"}
                       />
-                      <AvatarFallback className="bg-black-100 text-black-600">
+                      <AvatarFallback className="bg-muted text-muted-foreground">
                         {thread.title.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="sm:hidden">
-                      <div className="text-black-500 flex items-center gap-1 text-xs">
+                      <div className="text-muted-foreground flex items-center gap-1 text-xs">
                         <User className="h-3 w-3" />
-                        <span className="text-black-700 font-medium">
+                        <span className="font-medium text-foreground">
                           {thread.userName || "Usuário Anônimo"}
                         </span>
                       </div>
@@ -328,10 +328,10 @@ async function ForumContent({
                         isUnread={thread.isUnread}
                       />
                     </div>
-                    <div className="text-black-500 flex flex-col gap-2 text-xs sm:flex-row sm:items-center sm:gap-3">
+                    <div className="text-muted-foreground flex flex-col gap-2 text-xs sm:flex-row sm:items-center sm:gap-3">
                       <div className="hidden items-center gap-1 sm:flex">
                         <User className="h-3 w-3" />
-                        <span className="text-black-700 font-medium">
+                        <span className="font-medium text-foreground">
                           {thread.userName || "Usuário Anônimo"}
                         </span>
                       </div>
@@ -359,24 +359,21 @@ async function ForumContent({
                     </div>
                   </div>
 
-                  {/* Estatísticas */}
+                  {/* Estatísticas — Principia */}
                   <div className="flex items-center gap-3 text-sm">
-                    {/* Respostas */}
-                    <div className="text-black-500 flex items-center gap-1">
+                    <div className="text-muted-foreground flex items-center gap-1">
                       <MessageSquare className="h-4 w-4" />
                       <span className="hidden sm:inline">Respostas:</span>
                       <span className="sm:hidden">Resp:</span>
-                      <span className="text-black-700 text-lg font-bold">
+                      <span className="text-foreground text-lg font-bold">
                         {thread.postsCount}
                       </span>
                     </div>
-
-                    {/* Visualizações */}
-                    <div className="text-black-500 flex items-center gap-1">
+                    <div className="text-muted-foreground flex items-center gap-1">
                       <Eye className="h-4 w-4" />
                       <span className="hidden sm:inline">Visualizações:</span>
                       <span className="sm:hidden">Views:</span>
-                      <span className="text-black-700 text-lg font-bold">
+                      <span className="text-foreground text-lg font-bold">
                         {thread.views}
                       </span>
                     </div>
@@ -404,11 +401,11 @@ const ForumDetailsPage = async ({
   searchParams,
 }: ForumPageProps) => {
   return (
-    <div className="bg-black-50 min-h-screen">
+    <div className="bg-background min-h-screen">
       <div className="mx-auto max-w-7xl space-y-6 p-6">
-        {/* Header */}
+        {/* Header — Principia */}
         <div className="mb-6 text-center sm:mb-8">
-          <h1 className="text-black-900 text-2xl font-bold sm:text-3xl">
+          <h1 className="text-foreground text-2xl font-bold sm:text-3xl">
             VT Forums
           </h1>
         </div>

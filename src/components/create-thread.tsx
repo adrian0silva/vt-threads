@@ -42,7 +42,7 @@ export function CreateThread({ forums }: { forums: Forum[] }) {
     <>
       <Button
         onClick={() => setOpen((v) => !v)}
-        className="bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 font-medium text-white shadow-lg hover:from-orange-600 hover:to-red-600 sm:px-6 sm:py-3"
+        className="bg-primary text-primary-foreground hover:opacity-90 px-4 py-2 font-medium shadow-lg sm:px-6 sm:py-3"
         size="lg"
       >
         <PlusIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />

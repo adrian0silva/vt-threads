@@ -47,7 +47,7 @@ function ThreadHeader({
   thread: { title: string; userName: string | null; createdAt: Date };
 }) {
   return (
-    <div className="mb-6 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white shadow-lg md:p-6">
+    <div className="chaos-card bg-primary text-primary-foreground mb-6 p-4 md:p-6">
       <h1 className="mb-4 text-xl font-bold break-words md:text-3xl">
         {thread.title}
       </h1>
@@ -84,10 +84,10 @@ export function ThreadClient({
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50">
+      <div className="bg-background min-h-screen">
         <div className="mx-auto max-w-7xl space-y-6 p-6">
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-foreground text-3xl font-bold">
               Tópico de Discussão
             </h1>
           </div>

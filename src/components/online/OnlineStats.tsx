@@ -28,19 +28,19 @@ export function OnlineStats() {
     return (
       <>
         <div className="flex justify-between">
-          <dt className="flex items-center gap-1 text-gray-600">
+          <dt className="text-muted-foreground flex items-center gap-1">
             <Users className="h-4 w-4" />
             Usuários Online:
           </dt>
-          <dd className="font-bold text-gray-800">0</dd>
+          <dd className="font-bold text-foreground">0</dd>
         </div>
 
         <div className="flex justify-between">
-          <dt className="flex items-center gap-1 text-gray-600">
+          <dt className="text-muted-foreground flex items-center gap-1">
             <Eye className="h-4 w-4" />
             Visitantes:
           </dt>
-          <dd className="font-bold text-gray-800">0</dd>
+          <dd className="font-bold text-foreground">0</dd>
         </div>
       </>
     );
@@ -49,19 +49,19 @@ export function OnlineStats() {
   return (
     <>
       <div className="flex justify-between">
-        <dt className="flex items-center gap-1 text-gray-600">
+        <dt className="text-muted-foreground flex items-center gap-1">
           <Users className="h-4 w-4" />
           Usuários Online:
         </dt>
-        <dd className="font-bold text-gray-800">{data.logged}</dd>
+        <dd className="font-bold text-foreground">{data.logged}</dd>
       </div>
 
       <div className="flex justify-between">
-        <dt className="flex items-center gap-1 text-gray-600">
+        <dt className="text-muted-foreground flex items-center gap-1">
           <Eye className="h-4 w-4" />
           Visitantes:
         </dt>
-        <dd className="font-bold text-gray-800">{data.guests}</dd>
+        <dd className="font-bold text-foreground">{data.guests}</dd>
       </div>
     </>
   );

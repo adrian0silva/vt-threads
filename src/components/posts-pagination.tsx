@@ -46,8 +46,8 @@ export function PostsPagination({
     );
   
     return (
-      <div className="flex flex-col gap-4 border-t border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-gray-600">
+      <div className="border-border flex flex-col gap-4 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-muted-foreground text-sm">
           Mostrando <span className="font-medium">{start}</span>–
           <span className="font-medium">{end}</span> de{" "}
           <span className="font-medium">{totalItems}</span> tópicos
@@ -73,7 +73,7 @@ export function PostsPagination({
                 <Button variant="outline" size="icon" className="h-8 w-8" asChild>
                   <Link href={buildPageUrl(basePath, 1, per) as never}>1</Link>
                 </Button>
-                {pageStart > 2 && <span className="px-1 text-gray-400">…</span>}
+                {pageStart > 2 && <span className="text-muted-foreground px-1">…</span>}
               </>
             )}
             {pageNumbers.map((n) =>
@@ -102,7 +102,7 @@ export function PostsPagination({
             {pageEnd < totalPages && (
               <>
                 {pageEnd < totalPages - 1 && (
-                  <span className="px-1 text-gray-400">…</span>
+                  <span className="text-muted-foreground px-1">…</span>
                 )}
                 <Button
                   variant="outline"

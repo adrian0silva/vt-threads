@@ -37,8 +37,10 @@ export function ThreadTitleWithPreview({
         <Link href={`/threads/${slug}`}>
           <h3
             className={cn(
-              "text-black-900 mb-1 line-clamp-2 text-base font-bold transition-colors hover:text-blue-600 hover:underline sm:text-lg",
-              isUnread ? "font-bold text-black" : "font-normal text-gray-600",
+              "mb-1 line-clamp-2 text-base font-bold transition-colors hover:text-blue-600 hover:underline sm:text-lg",
+              isUnread
+                ? "font-bold text-black dark:text-white"
+                : "font-normal text-gray-600 dark:text-gray-400",
             )}
           >
             {title}

@@ -43,7 +43,6 @@ const mainNav = [
     url: "/forums/vale-tudo",
   },
   { title: "Em Alta", icon: Flame, url: "#" },
-  { title: "Notícias", icon: Newspaper, url: "#" },
 ];
 
 export function ForumSidebar(props: React.ComponentProps<typeof Sidebar>) {

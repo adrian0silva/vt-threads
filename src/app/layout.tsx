@@ -2,16 +2,16 @@ import "./globals.css";
 
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Special_Elite } from "next/font/google";
 
-import { AppSidebar } from "@/components/app-sidebar";
 import { ForumSidebar } from "@/components/forum-sidebar";
 import { PresencePing } from "@/components/presence-ping";
 import { SiteHeader } from "@/components/site-header";
+import { SkinProvider } from "@/components/skin-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import {
   SidebarInset,
   SidebarProvider,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
 
 const geistSans = Geist({
@@ -21,6 +21,12 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const specialElite = Special_Elite({
+  weight: "400",
+  variable: "--font-principia",
   subsets: ["latin"],
 });
 
@@ -34,9 +40,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-br" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${specialElite.variable} antialiased`}
       >
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var s=localStorage.getItem("vt-threads-skin");if(s==="principia")document.documentElement.classList.add("theme-principia");})();`,
+          }}
+        />
         <PresencePing />
+        <SkinProvider>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -51,6 +63,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </SidebarInset>
           </SidebarProvider>
         </ThemeProvider>
+        </SkinProvider>
       </body>
     </html>
   );

@@ -28,6 +28,8 @@ import { cn } from "@/lib/utils";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
+/** Abaixo desta largura (zoom alto ou tela estreita), a sidebar fica colapsada */
+const SIDEBAR_ZOOM_BREAKPOINT = 1200;
 const SIDEBAR_WIDTH = "16rem";
 const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
@@ -93,6 +95,18 @@ function SidebarProvider({
   const toggleSidebar = React.useCallback(() => {
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
   }, [isMobile, setOpen, setOpenMobile]);
+
+  // Colapsa a sidebar quando a viewport está estreita (zoom alto ou tela pequena).
+  React.useEffect(() => {
+    const syncCollapseByZoom = () => {
+      if (window.innerWidth < SIDEBAR_ZOOM_BREAKPOINT && open) {
+        setOpen(false);
+      }
+    };
+    syncCollapseByZoom();
+    window.addEventListener("resize", syncCollapseByZoom);
+    return () => window.removeEventListener("resize", syncCollapseByZoom);
+  }, [open, setOpen]);
 
   // Adds a keyboard shortcut to toggle the sidebar.
   React.useEffect(() => {

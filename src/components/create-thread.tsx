@@ -6,13 +6,9 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import type { ForumListItem } from "@/types/forum";
 
-type Forum = {
-  id: string;
-  title: string;
-};
-
-export function CreateThread({ forums }: { forums: Forum[] }) {
+export function CreateThread({ forums }: { forums: ForumListItem[] }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
 

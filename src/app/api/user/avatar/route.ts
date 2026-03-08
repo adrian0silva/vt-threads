@@ -1,24 +1,26 @@
-import { eq } from "drizzle-orm";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-import { db } from "@/db";
-import { userTable } from "@/db/schema";
+import * as userRepo from "@/repositories/user.repository";
 
 export async function POST(req: NextRequest) {
   try {
     const { image, userId } = await req.json();
 
     if (!image || !userId) {
-      return NextResponse.json({ error: "Parâmetros faltando" }, { status: 400 });
+      return Response.json(
+        { error: "Parâmetros faltando" },
+        { status: 400 }
+      );
     }
 
-    await db.update(userTable)
-      .set({ image: image })
-      .where(eq(userTable.id, userId));
+    await userRepo.updateAvatar(userId, image);
 
-    return NextResponse.json({ ok: true });
+    return Response.json({ ok: true });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Falha ao atualizar avatar" }, { status: 500 });
+    return Response.json(
+      { error: "Falha ao atualizar avatar" },
+      { status: 500 }
+    );
   }
 }

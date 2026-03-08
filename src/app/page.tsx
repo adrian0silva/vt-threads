@@ -1,5 +1,3 @@
-import { aliasedTable } from "drizzle-orm";
-import { and, desc, eq, inArray, isNotNull, sql } from "drizzle-orm";
 import { Clock, MessageSquare, User } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -12,22 +10,13 @@ import { ThreadTitleWithPreview } from "@/components/thread-title-with-preview";
 import { ThreadsPagination } from "@/components/threads-pagination";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import { db } from "@/db";
-import {
-  postTable,
-  threadReadTable,
-  threadTable,
-  userTable,
-} from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+import * as forumService from "@/services/forum.service";
+import * as threadService from "@/services/thread.service";
+import type { FilterType } from "@/types/filters";
 
 const DEFAULT_PER = 20;
-const lastPostUser = aliasedTable(userTable, "last_post_user");
-/** Sentinel for leftJoin when no session - never matches any user */
-const NO_SESSION_USER_ID = "__no_session__";
-
-type FilterType = "all" | "answered-by-me" | "viewed-by-me" | "unanswered";
 
 async function HomeContent({
   searchParams,
@@ -39,126 +28,39 @@ async function HomeContent({
   });
   const params = await searchParams;
   const page = Math.max(1, parseInt(params?.page ?? "1", 10) || 1);
-  const per = Math.min(100, Math.max(1, parseInt(params?.per ?? String(DEFAULT_PER), 10) || DEFAULT_PER));
+  const per = Math.min(
+    100,
+    Math.max(1, parseInt(params?.per ?? String(DEFAULT_PER), 10) || DEFAULT_PER)
+  );
   const filter = (params?.filter as FilterType) || "all";
 
-  const forums = await db.query.forumTable.findMany({});
+  const [forums, listResult] = await Promise.all([
+    forumService.listForums(),
+    threadService.listThreads({
+      filter,
+      page,
+      per,
+      sessionUserId: session?.user?.id ?? null,
+    }),
+  ]);
 
-  let totalCount: number;
-  if (filter === "unanswered") {
-    const rows = await db
-      .select({ id: threadTable.id })
-      .from(threadTable)
-      .leftJoin(postTable, eq(postTable.threadId, threadTable.id))
-      .groupBy(threadTable.id)
-      .having(sql`COUNT(${postTable.id}) = 0`);
-    totalCount = rows.length;
-  } else if (filter === "answered-by-me" && session?.user?.id) {
-    const rows = await db
-      .selectDistinct({ threadId: postTable.threadId })
-      .from(postTable)
-      .where(eq(postTable.userId, session.user.id));
-    totalCount = rows.length;
-  } else if (filter === "viewed-by-me" && session?.user?.id) {
-    const [r] = await db
-      .select({ totalCount: sql<number>`count(*)::int` })
-      .from(threadReadTable)
-      .where(eq(threadReadTable.userId, session.user.id));
-    totalCount = r?.totalCount ?? 0;
-  } else {
-    const [r] = await db
-      .select({ totalCount: sql<number>`count(*)::int` })
-      .from(threadTable);
-    totalCount = r?.totalCount ?? 0;
-  }
-
-  const totalPages = Math.ceil(totalCount / per) || 1;
-  const currentPage = Math.min(Math.max(1, page), totalPages);
-
-  let answeredThreadIds: string[] = [];
-  if (filter === "answered-by-me" && session?.user?.id) {
-    const answeredRows = await db
-      .selectDistinct({ threadId: postTable.threadId })
-      .from(postTable)
-      .where(eq(postTable.userId, session.user.id));
-    answeredThreadIds = answeredRows.map((r) => r.threadId).filter(Boolean);
-  }
-
-  const baseQuery = db
-    .select({
-      id: threadTable.id,
-      title: threadTable.title,
-      slug: threadTable.slug,
-      description: threadTable.description,
-      createdAt: threadTable.createdAt,
-      views: threadTable.views,
-      lastPostAt: threadTable.lastPostAt,
-      postsCount: sql<number>`COUNT(${postTable.id})`.mapWith(Number),
-      lastReadAt: threadReadTable.lastReadAt,
-      isUnread: sql<boolean>`
-        ${threadReadTable.lastReadAt} IS NULL
-        OR ${threadReadTable.lastReadAt} < ${threadTable.lastPostAt}
-      `,
-      userName: userTable.name,
-      userAvatar: userTable.image,
-      lastPostUserName: lastPostUser.name,
-      lastPostUserAvatar: lastPostUser.image,
-    })
-    .from(threadTable)
-    .leftJoin(postTable, eq(postTable.threadId, threadTable.id))
-    .leftJoin(userTable, eq(threadTable.userId, userTable.id))
-    .leftJoin(lastPostUser, eq(threadTable.lastPostUserId, lastPostUser.id))
-    .leftJoin(
-      threadReadTable,
-      and(
-        eq(threadReadTable.threadId, threadTable.id),
-        eq(threadReadTable.userId, session?.user?.id ?? NO_SESSION_USER_ID),
-      ),
-    );
-
-  const withWhere =
-    filter === "answered-by-me" && session?.user?.id
-      ? answeredThreadIds.length > 0
-        ? baseQuery.where(inArray(threadTable.id, answeredThreadIds))
-        : baseQuery.where(sql`1 = 0`)
-      : filter === "viewed-by-me" && session?.user?.id
-        ? baseQuery.where(isNotNull(threadReadTable.lastReadAt))
-        : baseQuery;
-
-  const withGroupBy = withWhere.groupBy(
-    threadTable.id,
-    threadTable.title,
-    threadReadTable.lastReadAt,
-    threadTable.slug,
-    threadTable.description,
-    threadTable.views,
-    threadTable.lastPostAt,
-    userTable.name,
-    userTable.image,
-    lastPostUser.name,
-    lastPostUser.image,
-  );
-
-  const withHaving = filter === "unanswered"
-    ? withGroupBy.having(sql`COUNT(${postTable.id}) = 0`)
-    : withGroupBy;
-
-  const threads = await withHaving
-    .orderBy(desc(threadTable.lastPostAt))
-    .limit(per)
-    .offset((currentPage - 1) * per);
+  const {
+    threads,
+    totalCount,
+    totalPages,
+    currentPage,
+  } = listResult;
 
   const basePath = "/";
-  const filterParams = (f: string) => (f === "all" ? basePath : `${basePath}?filter=${f}`);
+  const filterParams = (f: string) =>
+    f === "all" ? basePath : `${basePath}?filter=${f}`;
 
   return (
     <>
-      {/* Navigation */}
       <div className="mb-6">
         {session?.user && <CreateThread forums={forums} />}
       </div>
 
-      {/* Filtros estilo Principia */}
       <div className="mb-4 flex flex-wrap gap-2">
         <Link
           href={filterParams("all") as never}
@@ -166,7 +68,7 @@ async function HomeContent({
             "border-2 border-foreground px-3 py-1.5 text-sm font-medium transition-colors",
             filter === "all"
               ? "bg-foreground text-background"
-              : "bg-card text-foreground hover:bg-muted",
+              : "bg-card text-foreground hover:bg-muted"
           )}
         >
           Todos
@@ -179,7 +81,7 @@ async function HomeContent({
                 "border-2 border-foreground px-3 py-1.5 text-sm font-medium transition-colors",
                 filter === "answered-by-me"
                   ? "bg-foreground text-background"
-                  : "bg-card text-foreground hover:bg-muted",
+                  : "bg-card text-foreground hover:bg-muted"
               )}
             >
               Respondidos por mim
@@ -190,7 +92,7 @@ async function HomeContent({
                 "border-2 border-foreground px-3 py-1.5 text-sm font-medium transition-colors",
                 filter === "viewed-by-me"
                   ? "bg-foreground text-background"
-                  : "bg-card text-foreground hover:bg-muted",
+                  : "bg-card text-foreground hover:bg-muted"
               )}
             >
               Visualizadas por mim
@@ -203,7 +105,7 @@ async function HomeContent({
             "border-2 border-foreground px-3 py-1.5 text-sm font-medium transition-colors",
             filter === "unanswered"
               ? "bg-foreground text-background"
-              : "bg-card text-foreground hover:bg-muted",
+              : "bg-card text-foreground hover:bg-muted"
           )}
         >
           Sem respostas
@@ -211,7 +113,6 @@ async function HomeContent({
       </div>
 
       <div className="flex flex-col gap-8 lg:flex-row">
-        {/* Conteúdo principal */}
         {threads.length === 0 ? (
           <div className="bg-muted/50 border-border rounded-lg border py-12 text-center">
             <div className="mb-4">
@@ -236,7 +137,6 @@ async function HomeContent({
               >
                 <div className="p-4 sm:p-6">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-                    {/* Avatar do autor */}
                     <div className="flex items-center gap-3 sm:flex-col sm:items-center">
                       <Avatar className="border-border h-10 w-10 flex-shrink-0 rounded-none border sm:h-12 sm:w-12">
                         <AvatarImage
@@ -257,7 +157,6 @@ async function HomeContent({
                       </div>
                     </div>
 
-                    {/* Conteúdo principal */}
                     <div className="min-w-0 flex-1">
                       <div className="mb-2">
                         <ThreadTitleWithPreview
@@ -278,7 +177,7 @@ async function HomeContent({
                           <Clock className="h-3 w-3" />
                           <span>
                             {new Date(thread.createdAt).toLocaleDateString(
-                              "pt-BR",
+                              "pt-BR"
                             )}
                           </span>
                         </div>
@@ -292,7 +191,7 @@ async function HomeContent({
                                 : ""}{" "}
                               em{" "}
                               {new Date(thread.lastPostAt).toLocaleDateString(
-                                "pt-BR",
+                                "pt-BR"
                               )}
                             </span>
                           </div>
@@ -300,7 +199,6 @@ async function HomeContent({
                       </div>
                     </div>
 
-                    {/* Estatísticas — Principia */}
                     <div className="flex items-center justify-between gap-4 text-sm sm:flex-col sm:gap-6">
                       <div className="text-center">
                         <div className="text-muted-foreground mb-1 flex items-center gap-1">
@@ -328,7 +226,6 @@ async function HomeContent({
           </div>
         )}
 
-        {/* Barra lateral */}
         <aside className="lg:w-80">
           <RightRail />
         </aside>
@@ -344,12 +241,11 @@ export default async function Home({
 }) {
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-6">
-      {/* Header erisiano */}
       <div className="mb-8 text-center">
-        <h1 className="chaos-heading mb-2 text-4xl font-bold md:text-5xl">VT Forums</h1>
-        <p className="text-muted-foreground text-lg">
-          Bem-vindo ao fórum
-        </p>
+        <h1 className="chaos-heading mb-2 text-4xl font-bold md:text-5xl">
+          VT Forums
+        </h1>
+        <p className="text-muted-foreground text-lg">Bem-vindo ao fórum</p>
         <p className="text-accent mt-1 text-sm font-medium uppercase tracking-widest">
           All Hail Eris! All Hail Discordia!
         </p>
